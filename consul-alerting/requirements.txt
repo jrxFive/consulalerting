@@ -1,0 +1,5 @@
+requests
+consulate
+influxdb
+simplejson
+python-simple-hipchat
