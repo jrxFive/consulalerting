@@ -25,6 +25,7 @@ notify_hipchat= {"API_TOKEN":"",
 ```
 
 | Variable Name | Type | Description |
+| ------------- |------------- | ----- |
 | blacklist_nodes | Dict | Consul agents are not to notify of state changes, by "Node" name in /v1/health/node/<node> |
 | blacklist_services | Dict | Consul agents are not to notify of particular services, by "ServiceName" in /v1/health/node/<node> |
 | blacklist_checks | Dict | Consul agents are not to notify based on checks, by "CheckID" in  /v1/health/node/<node> |
