@@ -60,7 +60,7 @@ class NotificationEngine(object):
 
             # get request to 0.0.0.0:8500/v1/kv/notify/hipchat which routes to
             # consul master
-            self.hipchat = session.kv["notify/hipchat"]
+            self.hipchat = session.kv["alerting/notify/hipchat"]
 
             # Convert Keys to lower case
             self.hipchat = dict((key.lower(), value)
