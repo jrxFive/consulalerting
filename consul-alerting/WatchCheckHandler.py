@@ -25,7 +25,7 @@ class WatchCheckHandler(object):
         """
 
         self.hostname = hostname
-        self.kv_hostname_lookup = "node/{hostname}".format(
+        self.kv_hostname_lookup = "alerting/nodes/{hostname}".format(
             hostname=self.hostname)
         self.consulate_session = consulate.Consulate(host="0.0.0.0")
         self.consulAPILookups()
