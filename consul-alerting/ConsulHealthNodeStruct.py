@@ -42,7 +42,7 @@ class ConsulHealthNodeStruct(object):
         return None
 
     def __repr__(self):
-        return self.__dict__
+        return "{dict}".format(dict=self.__dict__)
 
     def __hash__(self):
         """

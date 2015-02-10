@@ -41,8 +41,8 @@ class WatchCheckHandler(object):
         to determine who will get notified by what
         """
         try:
-            self.catalog_node = self.consulate_session.node(self.hostname)
-            self.health_node_current = self.consulate_session.node(
+            self.catalog_node = self.consulate_session.catalog.node(self.hostname)
+            self.health_node_current = self.consulate_session.health.node(
                 self.hostname)
             self.health_check_tags = self.consulate_session.kv[
                 "alerting/healthchecktags"]
@@ -63,9 +63,9 @@ class WatchCheckHandler(object):
             self.node_blacklist = self.consulate_session.kv[
                 "alerting/blacklist/nodes"]
             self.service_blacklist = self.consulate_session.kv[
-                "alerting/blacklist/service"]
+                "alerting/blacklist/services"]
             self.check_blacklist = self.consulate_session.kv[
-                "alerting/blacklist/check"]
+                "alerting/blacklist/checks"]
         except KeyError:
             print "Consul blacklists do not exist"
             raise
@@ -216,5 +216,6 @@ if __name__ == "__main__":
     w = WatchCheckHandler()
     alert_list = w.checkForAlertChanges()
 
-    n = NotificationEngine(alert_list)
-    n.Run()
+    if alert_list:
+        n = NotificationEngine(alert_list)
+        n.Run()
