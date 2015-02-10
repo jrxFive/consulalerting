@@ -9,9 +9,8 @@ from NotificationEngine import NotificationEngine
 from ConsulHealthNodeStruct import ConsulHealthNodeStruct
 
 
-
-
 class WatchCheckHandler(object):
+
     """
     WatchCheckHandler will compare current node state from previous,
     if there are changes in checks will return those objects as a list of ConsulHealthNodeStruct.
@@ -20,17 +19,17 @@ class WatchCheckHandler(object):
     Consul KV
     """
 
-    def __init__(self,hostname=socket.gethostname(),consulAgentIP="0.0.0.0"):
+    def __init__(self, hostname=socket.gethostname(), consulAgentIP="0.0.0.0"):
         """
 
         """
 
         self.hostname = hostname
-        self.kv_hostname_lookup = "node/{hostname}".format(hostname=self.hostname)
+        self.kv_hostname_lookup = "node/{hostname}".format(
+            hostname=self.hostname)
         self.consulate_session = consulate.Consulate(host="0.0.0.0")
         self.consulAPILookups()
         self.alertsBlacklist()
-
 
     def __getattr__(self, item):
         return None
@@ -43,59 +42,60 @@ class WatchCheckHandler(object):
         """
         try:
             self.catalog_node = self.consulate_session.node(self.hostname)
-            self.health_node_current = self.consulate_session.node(self.hostname)
-            self.health_check_tags = self.consulate_session.kv["alerting/healthchecktags"]
+            self.health_node_current = self.consulate_session.node(
+                self.hostname)
+            self.health_check_tags = self.consulate_session.kv[
+                "alerting/healthchecktags"]
         except KeyError:
             raise
 
         try:
-            self.health_node_prior = self.consulate_session.kv[self.kv_hostname_lookup]
+            self.health_node_prior = self.consulate_session.kv[
+                self.kv_hostname_lookup]
         except KeyError:
             self.health_node_prior = []
-
 
     def alertsBlacklist(self):
         """
         Obtain blacklist options, if KeyError these keys do not exist in Consul KV
         """
         try:
-            self.node_blacklist = self.consulate_session.kv["alerting/blacklist/nodes"]
-            self.service_blacklist = self.consulate_session.kv["alerting/blacklist/service"]
-            self.check_blacklist = self.consulate_session.kv["alerting/blacklist/check"]
+            self.node_blacklist = self.consulate_session.kv[
+                "alerting/blacklist/nodes"]
+            self.service_blacklist = self.consulate_session.kv[
+                "alerting/blacklist/service"]
+            self.check_blacklist = self.consulate_session.kv[
+                "alerting/blacklist/check"]
         except KeyError:
             print "Consul blacklists do not exist"
             raise
 
-
-    def getHashStateSet(self,object_list,state):
+    def getHashStateSet(self, object_list, state):
         """
         Used to compare prior node state to current
         """
         return set(
             [hash(obj) for obj in object_list if obj.Status == state])
 
-
-
-    def getObjectListByState(self,object_list,state):
-        return  filter(
+    def getObjectListByState(self, object_list, state):
+        return filter(
             lambda obj: obj.Status == state, object_list)
 
-
-    def filterByBlacklists(self,object_list):
+    def filterByBlacklists(self, object_list):
 
         try:
-            #filter by services
-            filter_1 = [obj for obj in object_list if obj.ServiceName not in self.service_blacklist]
+            # filter by services
+            filter_1 = [
+                obj for obj in object_list if obj.ServiceName not in self.service_blacklist]
 
-            #filter by checks
-            final_filter = [obj for obj in filter_1 if obj.ServiceName not in self.check_blacklist]
+            # filter by checks
+            final_filter = [
+                obj for obj in filter_1 if obj.ServiceName not in self.check_blacklist]
 
             return final_filter
 
         except Exception:
             raise
-
-
 
     def createConsulHealthNodeList(self):
 
@@ -105,9 +105,7 @@ class WatchCheckHandler(object):
         self.health_node_prior_object_list = [ConsulHealthNodeStruct(
             self.catalog_node, self.health_check_tags, **obj) for obj in self.health_node_prior]
 
-        return (self.health_node_current_object_list,self.health_node_prior_object_list)
-
-
+        return (self.health_node_current_object_list, self.health_node_prior_object_list)
 
     def checkForAlertChanges(self):
         """
@@ -122,49 +120,61 @@ class WatchCheckHandler(object):
         if self.hostname in self.node_blacklist:
             return None
 
-        # list is empty, need to put current_node_health in KV/node when completed
+        # list is empty, need to put current_node_health in KV/node when
+        # completed
         if not self.health_node_prior:
 
             try:
                 health_node_current_object_list, _ = self.createConsulHealthNodeList()
-                health_node_current_object_list = self.filterByBlacklists(health_node_current_object_list)
+                health_node_current_object_list = self.filterByBlacklists(
+                    health_node_current_object_list)
 
-                #filter by state
-                node_current_state_warning = self.getObjectListByState(health_node_current_object_list,ConsulHealthNodeStruct.WARNING_STATE)
-                node_current_state_critical = self.getObjectListByState(health_node_current_object_list,ConsulHealthNodeStruct.CRITICAL_STATE)
+                # filter by state
+                node_current_state_warning = self.getObjectListByState(
+                    health_node_current_object_list, ConsulHealthNodeStruct.WARNING_STATE)
+                node_current_state_critical = self.getObjectListByState(
+                    health_node_current_object_list, ConsulHealthNodeStruct.CRITICAL_STATE)
 
-                #PUT current health (json) into node/hostname
-                self.consulate_session.kv[self.kv_hostname_lookup] = json.dumps(self.health_node_current)
+                # PUT current health (json) into node/hostname
+                self.consulate_session.kv[self.kv_hostname_lookup] = json.dumps(
+                    self.health_node_current)
 
-
-                return node_current_state_warning+node_current_state_critical
+                return node_current_state_warning + node_current_state_critical
 
             except Exception:
                 raise
             finally:
-                self.consulate_session.kv[self.kv_hostname_lookup] = json.dumps(self.health_node_current)
+                self.consulate_session.kv[self.kv_hostname_lookup] = json.dumps(
+                    self.health_node_current)
 
         else:
 
             try:
-                #create object lists of ConsulHealthNodeStruct
+                # create object lists of ConsulHealthNodeStruct
                 health_node_current_object_list, health_node_prior_object_list = self.createConsulHealthNodeList()
 
-                health_node_current_object_list = self.filterByBlacklists(health_node_current_object_list)
-                health_node_prior_object_list = self.filterByBlacklists(health_node_prior_object_list)
+                health_node_current_object_list = self.filterByBlacklists(
+                    health_node_current_object_list)
+                health_node_prior_object_list = self.filterByBlacklists(
+                    health_node_prior_object_list)
 
+                health_node_current_object_set_passing = self.getHashStateSet(
+                    health_node_current_object_list, ConsulHealthNodeStruct.PASSING_STATE)
 
+                health_node_current_object_set_warning = self.getHashStateSet(
+                    health_node_current_object_list, ConsulHealthNodeStruct.WARNING_STATE)
 
-                health_node_current_object_set_passing = self.getHashStateSet(health_node_current_object_list,ConsulHealthNodeStruct.PASSING_STATE)
-                health_node_current_object_set_warning = self.getHashStateSet(health_node_current_object_list,ConsulHealthNodeStruct.WARNING_STATE)
-                health_node_current_object_set_critical = self.getHashStateSet(health_node_current_object_list,ConsulHealthNodeStruct.CRITICAL_STATE)
-                health_node_current_object_set_unknown = self.getHashStateSet(health_node_current_object_list,ConsulHealthNodeStruct.UNKNOWN_STATE)
+                health_node_current_object_set_critical = self.getHashStateSet(
+                    health_node_current_object_list, ConsulHealthNodeStruct.CRITICAL_STATE)
 
+                health_node_current_object_set_unknown = self.getHashStateSet(
+                    health_node_current_object_list, ConsulHealthNodeStruct.UNKNOWN_STATE)
 
-                health_node_prior_object_set_warning = self.getHashStateSet(health_node_prior_object_list,ConsulHealthNodeStruct.WARNING_STATE)
-                health_node_prior_object_set_critical = self.getHashStateSet(health_node_prior_object_list,ConsulHealthNodeStruct.CRITICAL_STATE)
+                health_node_prior_object_set_warning = self.getHashStateSet(
+                    health_node_prior_object_list, ConsulHealthNodeStruct.WARNING_STATE)
 
-
+                health_node_prior_object_set_critical = self.getHashStateSet(
+                    health_node_prior_object_list, ConsulHealthNodeStruct.CRITICAL_STATE)
 
                 # Check for all current passing that were in prior warning/critical, set
                 # intersection
@@ -184,11 +194,10 @@ class WatchCheckHandler(object):
                     health_node_prior_object_set_critical
 
                 # combine set results, set union
-                alert_hash_set = health_node_current_object_set_unknown |  from_warning_or_critical_to_pass | warning_to_warning_difference | from_critical_to_warning | critical_to_critical_difference
+                alert_hash_set = health_node_current_object_set_unknown | from_warning_or_critical_to_pass | warning_to_warning_difference | from_critical_to_warning | critical_to_critical_difference
 
-
-
-                self.consulate_session.kv[self.kv_hostname_lookup] = json.dumps(self.health_node_current)
+                self.consulate_session.kv[self.kv_hostname_lookup] = json.dumps(
+                    self.health_node_current)
 
                 if alert_hash_set:
                     return [
@@ -199,7 +208,8 @@ class WatchCheckHandler(object):
             except Exception:
                 raise
             finally:
-                self.consulate_session.kv[self.kv_hostname_lookup] = json.dumps(self.health_node_current)
+                self.consulate_session.kv[self.kv_hostname_lookup] = json.dumps(
+                    self.health_node_current)
 
 
 if __name__ == "__main__":
@@ -208,96 +218,3 @@ if __name__ == "__main__":
 
     n = NotificationEngine(alert_list)
     n.Run()
-
-
-
-
-# HOSTNAME = socket.gethostname()
-# KV_NODE_HOSTNAME = "node/{hostname}".format(hostname=HOSTNAME)
-#
-# session = consulate.Consulate(host="0.0.0.0")
-#
-#
-# catalog_node = session.catalog.node(HOSTNAME)
-# # If a check is not associated to service, list of who/teams to notify and how
-# non_service_tags = session.kv["systemchecks"]
-# # If the hostname does not exist it will return empty list
-# health_node_current = session.health.node(HOSTNAME)
-#
-# try:
-#     health_node_prior = session.kv[KV_NODE_HOSTNAME]
-# except KeyError as kerr:
-#     health_node_prior = []
-#
-#
-#
-# # list is empty, need to put current_node_health in KV/node when completed
-# if not health_node_prior:
-#
-#     health_node_current_object_list = [ConsulHealthNodeStruct(
-#         catalog_node, non_service_tags, **obj) for obj in health_node_current]
-#
-#     node_current_state_warning = filter(
-#         lambda obj: obj.Status == ConsulHealthNodeStruct.WARNING_STATE, health_node_current_object_list)
-#     node_current_state_critical = filter(
-#         lambda obj: obj.Status == ConsulHealthNodeStruct.CRITICAL_STATE, health_node_current_object_list)
-#
-#     if node_current_state_warning or node_current_state_critical:
-#         NotificationEngine(node_current_state_warning + node_current_state_critical).Run()
-#
-#
-#     session.kv[KV_NODE_HOSTNAME] = json.dumps(health_node_current)
-#     sys.exit(0)
-#
-# else:
-#
-#     alert_hash_list = []
-#
-#     health_node_current_object_list = [ConsulHealthNodeStruct(
-#         catalog_node, non_service_tags, **obj) for obj in health_node_current]
-#     health_node_prior_object_list = [ConsulHealthNodeStruct(
-#         catalog_node, non_service_tags, **obj) for obj in health_node_prior]
-#
-#     health_node_current_object_set_passing = set(
-#         [hash(obj) for obj in health_node_current_object_list if obj.Status == ConsulHealthNodeStruct.PASSING_STATE])
-#     health_node_current_object_set_warning = set(
-#         [hash(obj) for obj in health_node_current_object_list if obj.Status == ConsulHealthNodeStruct.WARNING_STATE])
-#     health_node_current_object_set_critical = set(
-#         [hash(obj) for obj in health_node_current_object_list if obj.Status == ConsulHealthNodeStruct.CRITICAL_STATE])
-#     health_node_current_object_set_unknown = set(
-#         [hash(obj) for obj in health_node_current_object_list if obj.Status == ConsulHealthNodeStruct.UNKNOWN_STATE])
-#
-#     health_node_prior_object_set_passing = set(
-#         [hash(obj) for obj in health_node_prior_object_list if obj.Status == ConsulHealthNodeStruct.PASSING_STATE])
-#     health_node_prior_object_set_warning = set(
-#         [hash(obj) for obj in health_node_prior_object_list if obj.Status == ConsulHealthNodeStruct.WARNING_STATE])
-#     health_node_prior_object_set_critical = set(
-#         [hash(obj) for obj in health_node_prior_object_list if obj.Status == ConsulHealthNodeStruct.CRITICAL_STATE])
-#
-#     # Check for all current passing that were in prior warning/critical, set
-#     # intersection
-#     from_warning_or_critical_to_pass = health_node_current_object_set_passing & health_node_prior_object_set_warning & health_node_prior_object_set_warning
-#
-#     # Check for current warning in prior warning, if not in prior new alert,
-#     # set difference
-#     warning_to_warning_difference = health_node_current_object_set_warning - \
-#         health_node_prior_object_set_warning
-#
-#     # check for current warning in prior critical, set intersection
-#     from_critical_to_warning = health_node_current_object_set_warning & health_node_prior_object_set_critical
-#
-#     # check for current critical in prior critical, if not in prior new alert,
-#     # set difference
-#     critical_to_critical_difference = health_node_current_object_set_critical - \
-#         health_node_prior_object_set_critical
-#
-#     # combine set results, set union
-#     alert_hash_set = health_node_current_object_set_unknown | from_warning_or_critical_to_pass | warning_to_warning_difference | from_critical_to_warning | critical_to_critical_difference
-#
-#     if alert_hash_set:
-#         alert_list = [
-#             obj for obj in health_node_current_object_list if hash(obj) in alert_hash_set]
-#         NotificationEngine(alert_list).Run()
-#
-#     session.kv[KV_NODE_HOSTNAME] = json.dumps(health_node_current)
-#     sys.exit(0)

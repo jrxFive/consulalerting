@@ -3,7 +3,9 @@ import hipchat
 import consulate
 from ConsulHealthNodeStruct import ConsulHealthNodeStruct
 
+
 class NotificationEngine(object):
+
     """
     NotificationEngine, routes given ConsulHealthNodeStruct objects
     using the plugins available and based off tags in ConsulHealthNodeStruct.
@@ -36,8 +38,6 @@ class NotificationEngine(object):
 
     def __getattr__(self, item):
         return None
-
-
 
     def get_unique_tags_keys(self):
         """
