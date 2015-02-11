@@ -94,12 +94,13 @@ class InfluxDBQuery(object):
 
     def _returnInfluxDBQueryValuesList(self, json_dict):
         # influxdb response should have a length of two
-        values = json_dict[InfluxDBQuery.JSON_RESPONSE_ARRAY_INDEX]["points"]
-        if not values:
+        if json_dict:
+            values = json_dict[InfluxDBQuery.JSON_RESPONSE_ARRAY_INDEX]["points"]
+        else:
             sys.stdout.write("No Values found, possibly diamond has not sent data yet to influxdb, InfluxDB Series: {series}".format(series=self.influx_hostname_series))
             sys.exit(InfluxDBQuery.EXIT_WARNING)
-        else:
-            return values
+
+        return values
 
 
     def _messageGenerator(self,threshold_value,current_value):
@@ -172,7 +173,7 @@ def set_cli_parameters():
                       dest="influxdb_ip", help="IP of the InfluxDB timeseries database", default="127.0.0.1")
 
     parser.add_option("--influxdb-port", action="store", type="int", dest="influxdb_port",
-                      help="Port of the InfluxDB time series database", default=8086)
+                      help="Port of the InfluxDB time series database", default=8083)
 
     parser.add_option("--influxdb-user", action="store", type="string", dest="influxdb_user",
                       help="Username that has access to the database specified", default="root")
@@ -181,7 +182,7 @@ def set_cli_parameters():
                       help="Password to the username that has access to the influxdb database", default="root")
 
     parser.add_option("--influxdb-database", action="store", type="string",
-                      dest="influxdb_database", help="Database to query from InfluxDB", default="influxdb")
+                      dest="influxdb_database", help="Database to query from InfluxDB", default="diamond")
 
     parser.add_option("--query-full", action="store", type="string", dest="query_full", help="Full series name of the timeseries you want to check thresholds: \n \
     servers.name_domain.cpu.total.idle")

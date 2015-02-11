@@ -68,10 +68,13 @@ class ConsulHealthNodeStruct(object):
         if not self.ServiceID and not self.ServiceName:  # Is a system check
             tag_list = non_service_checks
         else:
-            tag_list = node_catalog["Services"][self.ServiceName]["Tags"]
+            tag_list = node_catalog["Services"][self.ServiceID]["Tags"]
 
         try:
-            self.Tags = map(lambda tag: tag.lower(), tag_list)
+            if tag_list:
+                self.Tags = map(lambda tag: tag.lower(), tag_list)
+            else:
+                self.Tags = []
         except TypeError:
             print "non_service_checks is not an iterable type: {value}".format(value=non_service_checks)
             raise

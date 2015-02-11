@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-__author__ = 'jxfiveMBP-W7'
 
 import requests
 import sys
