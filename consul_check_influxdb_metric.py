@@ -26,7 +26,9 @@ class InfluxDBQuery(object):
 
 
     def _createSeries(self):
-        if self.options.query_full:
+        if self.options.query_custom:
+            pass
+        elif self.options.query_full:
 
             self.influx_hostname_series = self.options.query_full
 
@@ -49,7 +51,10 @@ class InfluxDBQuery(object):
     def _buildInfluxDBQuery(self):
         self.query_string = None
 
-        if self.options.query_count:
+        if self.options.query_custom:
+            self.query_string = self.options.query_custom
+
+        elif self.options.query_count:
             self.query_string = "select COUNT(value) from {hostname_series} where time > now() - {seconds}s".format(hostname_series=self.influx_hostname_series,
                                                                                                                     seconds=self.options.query_count)
         elif self.options.query_min:
@@ -89,8 +94,13 @@ class InfluxDBQuery(object):
                                 self.options.influxdb_database,
                                 timeout=self.options.query_timeout)
 
-        self.query_result = client.query(
-            self.query_string, time_precision=self.options.query_time_precision)
+        try:
+            self.query_result = client.query(
+                self.query_string, time_precision=self.options.query_time_precision)
+        except Exception:
+            sys.stdout.write("Error in InfluxDB query request, may be an invalid query: {query}".format(query=self.query_string))
+            sys.exit(InfluxDBQuery.EXIT_CRITICAL)
+
 
     def _returnInfluxDBQueryValuesList(self, json_dict):
         # influxdb response should have a length of two
@@ -190,6 +200,9 @@ def set_cli_parameters():
     parser.add_option("--query-root-prefix", action="store",
                       type="string", dest="query_prefix", help="ADD", default="servers")
 
+    parser.add_option("--query-custom", action="store", dest="query_custom", type="string",
+                      help="Use a custom query")
+
     parser.add_option("--query-fqdn", action="store", type="string", dest="query_fqdn", help="Fully qualified domain name shown in InfluxDB of the time series to check thresholds: \n \
     name_domain")
 
@@ -232,6 +245,7 @@ def set_cli_parameters():
     parser.add_option("--query-first-seconds", action="store", dest="query_first", type="int",
                       help="Compare threshold against the first value in the query")
 
+
     parser.add_option("--query-timeout", action="store", dest="query_timeout", type="float",
                       help="Time till timeout exception is raised when querying influxdb, default is 3.0s", default=3.0)
 
@@ -257,7 +271,7 @@ def set_cli_parameters():
     if not all([options.influxdb_ip,options.influxdb_port,options.influxdb_user,options.influxdb_pass,options.influxdb_database]):
         parser.error("all influxdb options are required, or have a default")
 
-    if options.query_full:
+    if options.query_full or options.query_custom:
         pass
     else:
         if all([options.query_fqdn,options.query_series]):
@@ -273,7 +287,7 @@ def set_cli_parameters():
         parser.error("--threshold-critical is required")
 
     if not any([options.query_count, options.query_min, options.query_max, options.query_mean, options.query_mode,
-                            options.query_median, options.query_derivative, options.query_sum, options.query_stddev, options.query_first]):
+                            options.query_median, options.query_derivative, options.query_sum, options.query_stddev, options.query_first,options.query_custom]):
 
         parser.error("At least one --query options is required")
 

@@ -76,7 +76,7 @@ class HttpCheck(object):
 def set_cli_parameters():
     parser = optparse.OptionParser()
     parser.add_option("--ip", action="store", type="string",
-                      dest="http_ip", help="IP of HTTP service")
+                      dest="http_ip", help="IP of service")
 
     parser.add_option("--port", action="store", type="int", dest="http_port",
                       help="Port of HTTP service if needed")

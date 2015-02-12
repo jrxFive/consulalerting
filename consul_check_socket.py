@@ -36,6 +36,7 @@ class SocketCheck(object):
 
     def _evaluateOutput(self,data):
         if self.option.socket_output in data:
+            sys.stdout.write("Output: {result}".format(data))
             sys.exit(0)
         else:
             sys.stdout.write("--command-output not found in returned data. Expected Output: {command_output}, received_output: {recv_output}".format(command_output=self.option.socket_output,
