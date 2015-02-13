@@ -2,9 +2,9 @@
 import hipchat
 import consulate
 from ConsulHealthNodeStruct import ConsulHealthNodeStruct
+from ConsulAlerting import ConsulAlerting
 
-
-class NotificationEngine(object):
+class NotificationEngine(ConsulAlerting):
 
     """
     NotificationEngine, routes given ConsulHealthNodeStruct objects
@@ -31,6 +31,7 @@ class NotificationEngine(object):
         """consul_watch_handler_checks, will send a list of ConsulHealthNodeStruct
         :param list alert_list: of ConsulHealthNodeStruct Object
         """
+        super(NotificationEngine,self).__init__()
         self.alert_list = alert_list
 
         # eventually load these values some other way
@@ -104,19 +105,19 @@ class NotificationEngine(object):
 
         for roomname in common_hipchat_rooms:
 
-            if obj.Status == ConsulHealthNodeStruct.PASSING_STATE:
+            if obj.Status == NotificationEngine.PASSING_STATE:
                 color_value = "green"
                 notify_value = 0
 
-            elif obj.Status == ConsulHealthNodeStruct.WARNING_STATE:
+            elif obj.Status == NotificationEngine.WARNING_STATE:
                 color_value = "yellow"
                 notify_value = 1
 
-            elif obj.Status == ConsulHealthNodeStruct.CRITICAL_STATE:
+            elif obj.Status == NotificationEngine.CRITICAL_STATE:
                 color_value = "red"
                 notify_value = 1
 
-            elif obj.Status == ConsulHealthNodeStruct.UNKNOWN_STATE:
+            elif obj.Status == NotificationEngine.UNKNOWN_STATE:
                 color_value = "gray"
                 notify_value = 1
 

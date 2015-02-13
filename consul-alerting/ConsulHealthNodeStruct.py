@@ -13,16 +13,9 @@ class ConsulHealthNodeStruct(object):
         "ServiceID": "redis",
         "ServiceName": "redis"
       }
-
-
     """
-    WARNING_STATE = "warning"
-    CRITICAL_STATE = "critical"
-    PASSING_STATE = "passing"
-    UNKNOWN_STATE = "unknown"
-    ANY_STATE = "any"
 
-    def __init__(self, node_catalog, non_service_checks, **kwargs):
+    def __init__(self,**kwargs):
         """
         Constructs a :class `ConsulHealthNodeStruct <ConsulHealthNode> using
         a unpacked dictionary from /v1/health/node/<node>. Will also associate
@@ -33,7 +26,6 @@ class ConsulHealthNodeStruct(object):
         :param **kwargs, unpacked dictionary object of /v1/health/node/<node>
         """
         self.__dict__.update(kwargs)
-        self.addTags(node_catalog, non_service_checks)
 
     def __str__(self):
         return "{dict}".format(dict=self.__dict__)
@@ -55,7 +47,7 @@ class ConsulHealthNodeStruct(object):
     def __eq__(self, other):
         return (self.Node, self.CheckID, self.Name, self.ServiceID, self.ServiceName) == (other.Node, other.CheckID, other.Name, other.ServiceID, other.ServiceName)
 
-    def addTags(self, node_catalog, non_service_checks):
+    def addTags(self,node_catalog,non_service_checks):
         """
         Determines what type of check the object is based on attributes of ServiceID and ServiceName
         If both are blank then the check is not associated to an Application, to know who to alert to
