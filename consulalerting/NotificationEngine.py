@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 import hipchat
 import consulate
-from ConsulHealthNodeStruct import ConsulHealthNodeStruct
-from ConsulAlerting import ConsulAlerting
+import consulalerting.ConsulHealthNodeStruct
+import consulalerting.ConsulAlerting
 
-class NotificationEngine(ConsulAlerting):
+class NotificationEngine(consulalerting.ConsulAlerting):
 
     """
     NotificationEngine, routes given ConsulHealthNodeStruct objects

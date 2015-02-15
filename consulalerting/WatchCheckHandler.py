@@ -4,12 +4,13 @@ import consulate
 import simplejson as json
 import sys
 import logging
-from NotificationEngine import NotificationEngine
-from ConsulHealthNodeStruct import ConsulHealthNodeStruct
-from ConsulAlerting import ConsulAlerting
+import consulalerting.NotificationEngine
+from consulalerting import ConsulHealthNodeStruct
+import consulalerting.ConsulAlerting
 
 
-class WatchCheckHandler(ConsulAlerting):
+
+class WatchCheckHandler(consulalerting.ConsulAlerting):
 
     """
     WatchCheckHandler will compare current state from previous,
@@ -90,20 +91,24 @@ class WatchCheckHandler(ConsulAlerting):
 
             return filtered_nodes_checks_services
 
-        except Exception:
-            raise
+        except TypeError:
+            raise TypeError("blacklist variables not found")
 
     def createConsulHealthNodeList(self):
         """
         Creates a list of ConsulHealthNodeStruct, returns as a tuple of lists
         current health and prior health
         """
+        try:
+            health_current_object_list = [ConsulHealthNodeStruct(**obj) for obj in self.health_current]
 
-        health_current_object_list = [ConsulHealthNodeStruct(**obj) for obj in self.health_current]
+            health_prior_object_list = [ConsulHealthNodeStruct(**obj) for obj in self.health_prior]
 
-        health_prior_object_list = [ConsulHealthNodeStruct(**obj) for obj in self.health_prior]
+            return (health_current_object_list, health_prior_object_list)
 
-        return (health_current_object_list, health_prior_object_list)
+        except TypeError:
+            print "self.health_current or self.health_prior have not be instantiated, they need to be an iterable"
+            raise
 
 
     def nodeCatalogTags(self,object_list,health_check_tags=None):
@@ -136,16 +141,16 @@ class WatchCheckHandler(ConsulAlerting):
 
             try:
                 # filter by state
-                node_current_state_warning = self.getObjectListByState(
+                current_state_warning = self.getObjectListByState(
                     health_current_object_list, WatchCheckHandler.WARNING_STATE)
-                node_current_state_critical = self.getObjectListByState(
+                current_state_critical = self.getObjectListByState(
                     health_current_object_list, WatchCheckHandler.CRITICAL_STATE)
 
                 # PUT current health (json) into node/hostname
                 self.consulate_session.kv[WatchCheckHandler.KV_PRIOR_STATE] = json.dumps(
                     self.health_current)
 
-                alert_list = node_current_state_warning + node_current_state_critical
+                alert_list = current_state_warning + current_state_critical
 
 
                 if alert_list:
@@ -242,5 +247,5 @@ if __name__ == "__main__":
     alert_list = w.Run()
 
     if alert_list:
-        n = NotificationEngine(alert_list)
+        n = consulalerting.NotificationEngine(alert_list)
         n.Run()
