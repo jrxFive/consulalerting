@@ -88,7 +88,7 @@ After the script is run, you can always change these within the Consul UI
 
 | Keyname | Type | Description |
 | ------- | ---- | ----------- |
-| apitoken | string | Hipchat requires an auth_token |
+| api_token | string | Hipchat requires an auth_token |
 | url | string | URL address of API access for corresponding token |
 | rooms | dict | Create dictionaries within 'rooms' for tags corresponding to hipchat rooms |
 
@@ -96,14 +96,14 @@ After the script is run, you can always change these within the Consul UI
 
 | Keyname | Type | Description |
 | ------- | ---- | ----------- |
-| apitoken | string | Slack requires an auth_token |
+| api_token | string | Slack requires an auth_token |
 | rooms | dict | Create dictionaries within 'rooms' for tags corresponding to slack channels |
 
 ### Mailgun
 
 | Keyname | Type | Description |
 | ------- | ---- | ----------- |
-| apitoken | string | Mailgun requires an auth_token |
+| api_token | string | Mailgun requires an auth_token |
 | mailgun_domain | string | Mailgun domain address  |
 | from | string | From address when receiving an email |
 | teams | dict | Create dictionaries within 'teams' for tags corresponding to teams or individuals |
