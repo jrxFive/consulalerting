@@ -4,17 +4,18 @@ import consulate
 import simplejson as json
 import sys
 import logging
-import consulalerting.NotificationEngine
-from consulalerting import ConsulHealthNodeStruct
-import consulalerting.ConsulAlerting
+from NotificationEngine import NotificationEngine
+from ConsulHealthStruct import ConsulHealthStruct
+from Settings import Settings
 
 
 
-class WatchCheckHandler(consulalerting.ConsulAlerting):
+
+class WatchCheckHandler(Settings):
 
     """
     WatchCheckHandler will compare current state from previous,
-    if there are changes in checks will return those objects as a list of ConsulHealthNodeStruct.
+    if there are changes in checks will return those objects as a list of ConsulHealthStruct.
 
     When running checkForAlertChanges, current state will be filtered by blacklists in
     Consul KV
@@ -73,47 +74,73 @@ class WatchCheckHandler(consulalerting.ConsulAlerting):
             lambda obj: obj.Status == state, object_list)
 
 
-    def filterByBlacklists(self, object_list):
-        """
-        Filter a list of ConsulHealthNodeStruct by the blacklists in the KV
-        """
-        try:
-            # filter by services
+    def filterByServiceBlacklist(self,object_list):
             filtered_services = [
                 obj for obj in object_list if obj.ServiceName not in self.service_blacklist]
 
-            # filter by checks
-            filtered_checks_services = [
-                obj for obj in filtered_services if obj.ServiceName not in self.check_blacklist]
+            return filtered_services
 
-            filtered_nodes_checks_services = [
-                obj for obj in filtered_checks_services if obj.Node not in self.node_blacklist]
+    def filterByCheckBlacklist(self,object_list):
+            filtered_checks = [
+                obj for obj in object_list if obj.ServiceName not in self.check_blacklist]
 
-            return filtered_nodes_checks_services
+            return filtered_checks
+
+
+    def filterByNodeBlacklist(self,object_list):
+
+            filtered_nodes = [
+                obj for obj in object_list if obj.Node not in self.node_blacklist]
+
+
+            return filtered_nodes
+
+
+    def filterByBlacklists(self, object_list):
+        """
+        Filter a list of ConsulHealthStruct by the blacklists in the KV
+        """
+        try:
+            filtered_object_list = []
+            for obj in object_list:
+
+                #filter by service_blacklist
+                if obj.ServiceName in self.service_blacklist:
+                    continue
+
+                #filter by check_blacklist
+                if obj.ServiceName in self.check_blacklist:
+                    continue
+
+                #filter by node_blacklist
+                if obj.Node in self.node_blacklist:
+                    continue
+
+                filtered_object_list.append(obj)
+
+
+            return filtered_object_list
 
         except TypeError:
             raise TypeError("blacklist variables not found")
 
-    def createConsulHealthNodeList(self):
+    def createConsulHealthList(self,object_list):
         """
-        Creates a list of ConsulHealthNodeStruct, returns as a tuple of lists
-        current health and prior health
+        Creates a list of ConsulHealthStruct
         """
         try:
-            health_current_object_list = [ConsulHealthNodeStruct(**obj) for obj in self.health_current]
+            object_list = [ConsulHealthStruct(**obj) for obj in object_list]
 
-            health_prior_object_list = [ConsulHealthNodeStruct(**obj) for obj in self.health_prior]
-
-            return (health_current_object_list, health_prior_object_list)
+            return object_list
 
         except TypeError:
-            print "self.health_current or self.health_prior have not be instantiated, they need to be an iterable"
+            print "object_list needs to be an iterable"
             raise
 
 
     def nodeCatalogTags(self,object_list,health_check_tags=None):
         """
-        Add tags to each object in a list of ConsulHealthNodeStruct, acquires catalog for each 'Node' to associate
+        Add tags to each object in a list of ConsulHealthStruct, acquires catalog for each 'Node' to associate
         service tags for NotificationEngine to determine who to alert. Consul checks not associated to application
         or services do not have tags, used list of check_tags or the Consul KV check tags to determine who to notify
         """
@@ -131,13 +158,13 @@ class WatchCheckHandler(consulalerting.ConsulAlerting):
         any warning/critical statuses.
 
         If PUT beforehand compare based on object hash values, if there are any changes return
-        object list (ConsulHealthNodeStruct)
+        object list (ConsulHealthStruct)
         """
 
 
         # list is empty, need to put current_health in KV when
         # completed
-        if not self.health_prior:
+        if not self.health_prior_object_list:
 
             try:
                 # filter by state
@@ -227,7 +254,8 @@ class WatchCheckHandler(consulalerting.ConsulAlerting):
     def Run(self):
         self.consulAPILookups()
         self.alertsBlacklist()
-        health_current_object_list, health_prior_object_list = self.createConsulHealthNodeList()
+        health_current_object_list = self.createConsulHealthList(self.health_current)
+        health_prior_object_list = self.createConsulHealthList(self.health_prior)
 
         health_current_object_list_filtered = self.filterByBlacklists(
                     health_current_object_list)
@@ -247,5 +275,5 @@ if __name__ == "__main__":
     alert_list = w.Run()
 
     if alert_list:
-        n = consulalerting.NotificationEngine(alert_list)
+        n = NotificationEngine(alert_list)
         n.Run()

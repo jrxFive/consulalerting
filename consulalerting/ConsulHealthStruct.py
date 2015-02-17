@@ -1,5 +1,5 @@
 
-class ConsulHealthNodeStruct(object):
+class ConsulHealthStruct(object):
 
     """
     A Python Object representation of Consul /v1/health/node/<node>
@@ -17,7 +17,7 @@ class ConsulHealthNodeStruct(object):
 
     def __init__(self,**kwargs):
         """
-        Constructs a :class `ConsulHealthNodeStruct <ConsulHealthNode> using
+        Constructs a :class `ConsulHealthStruct <ConsulHealth> using
         a unpacked dictionary from /v1/health/node/<node>. Will also associate
         Tags from /v1/catalog/node/<node>
 

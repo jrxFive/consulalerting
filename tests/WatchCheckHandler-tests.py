@@ -2,7 +2,7 @@
 import unittest
 import simplejson as json
 import consulalerting.WatchCheckHandler
-import consulalerting.ConsulHealthNodeStruct
+import consulalerting.ConsulHealthStruct
 
 
 FOOBAR_CATALOG = json.loads("""{
@@ -89,7 +89,7 @@ class WatchCheckHandlerTests(unittest.TestCase):
 
     def test_CreateConsulHealthNodeList(self):
         current_obj_list, prior_obj_list = self.watch.createConsulHealthNodeList()
-        self.assertEqual(current_obj_list[0],consulalerting.ConsulHealthNodeStruct(**CURRENT_STATE[0]))
+        self.assertEqual(current_obj_list[0],consulalerting.ConsulHealthStruct(**CURRENT_STATE[0]))
 
 
     def test_GetObjectListByStateWarning(self):
