@@ -51,9 +51,9 @@ class WatchCheckHandler(Settings):
         Obtain blacklist options, if KeyError these keys do not exist in Consul KV
         """
         try:
-            self.node_blacklist = self.consulate_session.kv[WatchCheckHandler.KV_ALERTING_BLACKLIST_NODES]
-            self.service_blacklist = self.consulate_session.kv[WatchCheckHandler.KV_ALERTING_BLACKLIST_SERVICES]
-            self.check_blacklist = self.consulate_session.kv[WatchCheckHandler.KV_ALERTING_BLACKLIST_CHECKS]
+            self.node_blacklist = set(self.consulate_session.kv[WatchCheckHandler.KV_ALERTING_BLACKLIST_NODES])
+            self.service_blacklist = set(self.consulate_session.kv[WatchCheckHandler.KV_ALERTING_BLACKLIST_SERVICES])
+            self.check_blacklist = set(self.consulate_session.kv[WatchCheckHandler.KV_ALERTING_BLACKLIST_CHECKS])
         except KeyError:
             print "Consul blacklists do not exist"
             raise

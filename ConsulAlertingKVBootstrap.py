@@ -1,15 +1,15 @@
 import consulate
 import simplejson as json
 
-blacklist_nodes = {}
-blacklist_services = {}
-blacklist_checks = {}
+blacklist_nodes = []
+blacklist_services = []
+blacklist_checks = []
 
 
 health_check_tags = []
 
 
-notify_plugins = ["hipchat","slack","mailgun"]
+notify_plugins = ["hipchat","slack","mailgun","email"]
 
 notify_hipchat= {"api_token":"",
                  "url":"",
@@ -51,7 +51,7 @@ try:
 
     consulate_session.kv["alerting/notify/mailgun"] = json.dumps(notify_mailgun)
 
-    consulate_session.kv["alerting/notify/email"] = json.dumps(notify_mailgun)
+    consulate_session.kv["alerting/notify/email"] = json.dumps(notify_email)
 
     consulate_session.kv["alerting/prior/"] = []
 except TypeError:

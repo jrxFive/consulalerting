@@ -30,10 +30,9 @@ the scripts can obtain the necessary KV information from Consul.
 
 
 
-blacklist_nodes = {"fqdn":"",
-                   "other_fqdn":""}
-blacklist_services = {"redis":""}
-blacklist_checks = {"service:redis":""}
+blacklist_nodes = ["fqdn","other_fqdn"]
+blacklist_services = ["redis"]
+blacklist_checks = ["service:redis"]
 
 health_check_tags = ["devops","hipchat","techops"]
 
@@ -65,9 +64,9 @@ notify_email= {"mail_domain_address":"email.domain.com",
 
 | Variable Name | Type | Description |
 | ------------- |------------- | ----- |
-| blacklist_nodes | Dict | Consul agents are not to notify of state changes, by "Node" name in /v1/health/node/<node> |
-| blacklist_services | Dict | Consul agents are not to notify of particular services, by "ServiceName" in /v1/health/node/<node> |
-| blacklist_checks | Dict | Consul agents are not to notify based on checks, by "CheckID" in  /v1/health/node/<node> |
+| blacklist_nodes | List | Consul agents are not to notify of state changes, by "Node" name in /v1/health/node/<node> |
+| blacklist_services | List | Consul agents are not to notify of particular services, by "ServiceName" in /v1/health/node/<node> |
+| blacklist_checks | List | Consul agents are not to notify based on checks, by "CheckID" in  /v1/health/node/<node> |
 | health_check_tags | List | Tags to be used to determine who to alert to and what type of alerts for non-application checks |
 
 
