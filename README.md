@@ -1,8 +1,28 @@
 # Consul Alerting
-A set of python files for Consul for checks, watches, and notifications
+A set of python files for Consul for checks, watches, and notifications. By using tags for services and checks,
+consulalerting will notify the corresponding groups by whichever plugins are also in the tags list. For example
+the redis service has plugins enabled for "hipchat" and will route notifications via hipchat to "devops" and "techops".
+These routes are defined in the Consul KV under alerting/notify/, and can be setup using ConsulAlertingKVBoostrap.py, Consul KV, or programatically.
 
-After installing files in a directory of your choosing, use/edit ConsulAlertingKVBootstrap.py to ensure
-the scripts can obtain the necessary KV information from Consul
+
+# Using Tags to notify
+
+```javascript
+{
+  "service": {
+    "name": "redis",
+    "tags": ["devops","master","hipchat","dev"],
+    "port": 8000,
+    "check": {
+      "script": "/usr/local/bin/check_redis.py",
+      "interval": "10s"
+    }
+  }
+}
+```
+
+After installing consulalerting in a directory of your choosing, use/edit ConsulAlertingKVBootstrap.py to ensure
+the scripts can obtain the necessary KV information from Consul.
 
 ## Example ConsulAlertingKVBoostrap.py
 ```python
@@ -51,21 +71,7 @@ notify_email= {"mail_domain_address":"email.domain.com",
 | health_check_tags | List | Tags to be used to determine who to alert to and what type of alerts for non-application checks |
 
 
-# Using Tags to notify
 
-```javascript
-{
-  "service": {
-    "name": "redis",
-    "tags": ["devops","master","hipchat","dev"],
-    "port": 8000,
-    "check": {
-      "script": "/usr/local/bin/check_redis.py",
-      "interval": "10s"
-    }
-  }
-}
-```
 
 
 After the script is run, you can always change these within the Consul UI
@@ -117,3 +123,10 @@ After the script is run, you can always change these within the Consul UI
 | password | string | If the email SMTP server requires authentication |
 | from | string | From address when receiving an email |
 | teams | dict | Create dictionaries within 'teams' for tags corresponding to teams or individuals |
+
+# TODO
+1. Logging
+2. Improve performance additional profiling
+3. Additional method documentation
+3. Couple more plugins (Pagerduty) etc
+4. Make it easier to add custom plugins
