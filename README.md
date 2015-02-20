@@ -90,7 +90,7 @@ After the script is run, you can always change these within the Consul UI
   "watches": [
     {
       "type": "checks",
-      "handler": "/opt/consul/scripts/consulalerting/WatchCheckHandler.py"
+      "handler": "<DESTINATION_FOLDER>/consulalerting/WatchCheckHandler.py"
     }
   ]
 }
