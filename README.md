@@ -21,6 +21,15 @@ These routes are defined in the Consul KV under alerting/notify/, and can be set
 }
 ```
 
+# Install steps
+
+```bash
+git clone https://github.com/jrxFive/Consul-Alerting
+cp -r Consul-Alerting/consulalerting <DESTINATION_FOLDER>
+# edit ConsulAlertingKVBoostrap.py or setup manually on ConsulKV interface
+python Consul-Alerting/ConsulAlertingKVBoostrap.py
+```
+
 After installing consulalerting in a directory of your choosing, use/edit ConsulAlertingKVBootstrap.py to ensure
 the scripts can obtain the necessary KV information from Consul.
 
@@ -75,7 +84,7 @@ notify_email= {"mail_domain_address":"email.domain.com",
 
 After the script is run, you can always change these within the Consul UI
 
-# Consul Watch Check Handler Setup
+## Consul Watch Check Handler Setup
 ```javascript
 {
   "watches": [
