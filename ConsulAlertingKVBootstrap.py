@@ -9,7 +9,7 @@ blacklist_checks = []
 health_check_tags = []
 
 
-notify_plugins = ["hipchat","slack","mailgun","email"]
+notify_plugins = ["hipchat","slack","mailgun","email","pagerduty"]
 
 notify_hipchat= {"api_token":"",
                  "url":"",
@@ -30,6 +30,8 @@ notify_email= {"mail_domain_address":"",
                "from": "",
                "teams":{}
                 }
+
+notify_pagerduty= {"teams":{}}
 
 
 consulate_session = consulate.Consulate()
@@ -52,6 +54,8 @@ try:
     consulate_session.kv["alerting/notify/mailgun"] = json.dumps(notify_mailgun)
 
     consulate_session.kv["alerting/notify/email"] = json.dumps(notify_email)
+
+    consulate_session.kv["alerting/notify/pagerduty"] = json.dumps(notify_pagerduty)
 
     consulate_session.kv["alerting/prior/"] = []
 except TypeError:

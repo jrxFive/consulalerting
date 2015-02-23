@@ -3,5 +3,3 @@ tornado
 consulate
 influxdb
 simplejson
-python-simple-hipchat
-slacker

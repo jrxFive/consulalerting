@@ -46,7 +46,7 @@ blacklist_checks = ["service:redis"]
 health_check_tags = ["devops","hipchat","techops"]
 
 notify_hipchat= {"api_token":"",
-                 "url":"api.hipchat.com",
+                 "url":"https://api.hipchat.com/v1/rooms/message",
                  "rooms":{"devops":3},
                         {"techops":4},
                  }
@@ -68,6 +68,12 @@ notify_email= {"mail_domain_address":"email.domain.com",
                "teams":{"devops":["guy@example.com","girl@example.com"],
                           "qa": "lonelyqa@example.com"}
                 }
+
+notify_pagerduty = {"teams":{
+                             "devops":"<SERVICE_KEY>"
+                             }
+                   }
+}
 
 ```
 
@@ -132,9 +138,16 @@ After the script is run, you can always change these within the Consul UI
 | from | string | From address when receiving an email |
 | teams | dict | Create dictionaries within 'teams' for tags corresponding to teams or individuals |
 
+
+### Pagerduty
+
+| Keyname | Type | Description |
+| ------- | ---- | ----------- |
+| teams | dict | Create dictionaries within 'teams' for tags corresponding to pagerduty teams, value is service_key |
+
 # TODO
 1. Logging
 2. Improve performance additional profiling
 3. Additional method documentation
-3. Couple more plugins (Pagerduty) etc
+3. Couple more plugins ~~(Pagerduty)~~ etc
 4. Make it easier to add custom plugins

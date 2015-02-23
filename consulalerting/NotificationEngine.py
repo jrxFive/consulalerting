@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 import requests
-import hipchat
 import consulate
+import simplejson as json
 import smtplib
 import string
-from slacker import Slacker
 from multiprocessing import Process
 from Settings import Settings
 
@@ -77,8 +76,11 @@ class NotificationEngine(Settings):
         if "email" in configurations_files_to_load:
             self.email = self.load_plugin(NotificationEngine.KV_ALERTING_NOTIFY_EMAIL,"teams")
 
+        if "pagerduty" in configurations_files_to_load:
+            self.pagerduty = self.load_plugin(NotificationEngine.KV_ALERTING_NOTIFY_PAGERDUTY,"teams")
 
-        return (self.hipchat,self.slack,self.mailgun,self.email)
+
+        return (self.hipchat,self.slack,self.mailgun,self.email,self.pagerduty)
 
 
 
@@ -158,7 +160,10 @@ class NotificationEngine(Settings):
             email = self.email
             Process(target=notify_email,args=(obj,message_template,common_notifiers,email)).start()
 
-
+        if "pagerduty" in obj.Tags and self.pagerduty:
+            common_notifiers = self.common_notifiers(obj,"teams",self.pagerduty)
+            pagerduty = self.pagerduty
+            Process(target=notify_pagerduty,args=(obj,message_template,common_notifiers,pagerduty)).start()
 
     def Run(self):
         self.get_available_plugins()
@@ -173,12 +178,9 @@ class NotificationEngine(Settings):
 
 
 def notify_hipchat(obj, message_template,common_notifiers,consul_hipchat):
-    #common_hipchat_rooms = self.common_notifiers(obj,"rooms",self.hipchat)
 
-    # Use hipchat library to use for notifications requires api_token and
-    # url
-    hipster = hipchat.HipChat(
-        token=consul_hipchat["api_token"], url=consul_hipchat["url"])
+    notify_value = 0
+    color_value = "yellow"
 
     for roomname in common_notifiers:
 
@@ -198,33 +200,31 @@ def notify_hipchat(obj, message_template,common_notifiers,consul_hipchat):
             color_value = "gray"
             notify_value = 1
 
+        requests.post(consul_hipchat["url"],params={'room_id':int(consul_hipchat["rooms"][roomname]),
+                                                    'from': 'Consul',
+                                                    'message':message_template,
+                                                    'notify':notify_value,
+                                                    'color':color_value,
+                                                    'auth_token': consul_hipchat["api_token"]})
 
-        hipster.message_room(room_id=int(consul_hipchat["rooms"][roomname]), message_from="Consul",
-                             message=message_template,
-                             notify=notify_value,
-                             color=color_value)
 
 def notify_slack(obj, message_template,common_notifiers,consul_slack):
-    common_slack_rooms = common_notifiers
 
+    for roomname in common_notifiers:
 
-    # Use slack library to use for notifications requires api_token and
-    # url
-    slacker = Slacker(consul_slack["api_token"])
+        requests.post("https://slack.com/api/chat.postMessage",params={'channel':consul_slack["rooms"][roomname],
+                                                                       'username': 'Consul',
+                                                                       'token':consul_slack["api_token"],
+                                                                       'text':message_template})
 
-    for roomname in common_slack_rooms:
-
-        slacker.chat.post_message(consul_slack["rooms"][roomname],message_template,"Consul")
 
 
 def notify_mailgun(obj, message_template,common_notifiers,consul_mailgun):
-    common_mailgun_teams = common_notifiers
-
 
     api_endpoint = "https://api.mailgun.net/v2/{domain}/messages".format(domain=consul_mailgun["mailgun_domain"])
     auth_tuple=('api', consul_mailgun["api_token"])
 
-    for teamname in common_mailgun_teams:
+    for teamname in common_notifiers:
 
         requests.post(api_endpoint,
                       auth=auth_tuple,
@@ -236,7 +236,6 @@ def notify_mailgun(obj, message_template,common_notifiers,consul_mailgun):
 
 
 def notify_email(obj,message_template,common_notifiers,consul_email):
-    common_email_teams = common_notifiers
 
     server = smtplib.SMTP(consul_email["mail_domain_address"])
 
@@ -246,7 +245,7 @@ def notify_email(obj,message_template,common_notifiers,consul_email):
     from_address = consul_email["from"]
     subject = "Consul Alert"
 
-    for teamname in common_email_teams:
+    for teamname in common_notifiers:
 
         body = string.join((
             "From: %s" % from_address,
@@ -259,3 +258,28 @@ def notify_email(obj,message_template,common_notifiers,consul_email):
         server.sendmail(from_address,teamname,body)
 
     server.quit()
+
+def notify_pagerduty(obj,message_template,common_notifiers,consul_pagerduty):
+
+    for teamname in common_notifiers:
+
+        if obj.Status == NotificationEngine.PASSING_STATE:
+            pagerduty_event_type = "resolve"
+        else:
+            pagerduty_event_type = "trigger"
+
+
+        pagerduty_incident_key = "{node}/{CheckID}".format(node=obj.Node,
+                                                           CheckID=obj.CheckID)
+
+
+        pagerduty_data = {"service_key": consul_pagerduty["teams"][teamname],
+                          "event_type": pagerduty_event_type,
+                          "description": message_template,
+                          "incident_key": pagerduty_incident_key
+                          }
+
+        requests.post("https://events.pagerduty.com/generic/2010-04-15/create_event.json",
+                      data=json.dumps(pagerduty_data),
+                      headers={'content-type': 'application/json'})
+
