@@ -1,6 +1,7 @@
+from Settings import Settings
 
-class ConsulHealthStruct(object):
 
+class ConsulHealthStruct(Settings):
     """
     A Python Object representation of Consul /v1/health/node/<node>
       {
@@ -15,7 +16,7 @@ class ConsulHealthStruct(object):
       }
     """
 
-    def __init__(self,**kwargs):
+    def __init__(self, **kwargs):
         """
         Constructs a :class `ConsulHealthStruct <ConsulHealth> using
         a unpacked dictionary from /v1/health/node/<node>. Will also associate
@@ -25,6 +26,7 @@ class ConsulHealthStruct(object):
         :param non_service_checks, /v1/kv/systemchecks, list, list of tags usually for non service checks
         :param **kwargs, unpacked dictionary object of /v1/health/node/<node>
         """
+        super(ConsulHealthStruct, self).__init__()
         self.__dict__.update(kwargs)
 
     def __str__(self):
@@ -45,9 +47,10 @@ class ConsulHealthStruct(object):
         return hash((self.Node, self.CheckID, self.Name, self.ServiceID, self.ServiceName))
 
     def __eq__(self, other):
-        return (self.Node, self.CheckID, self.Name, self.ServiceID, self.ServiceName) == (other.Node, other.CheckID, other.Name, other.ServiceID, other.ServiceName)
+        return (self.Node, self.CheckID, self.Name, self.ServiceID, self.ServiceName) == (
+        other.Node, other.CheckID, other.Name, other.ServiceID, other.ServiceName)
 
-    def addTags(self,node_catalog,non_service_checks):
+    def addTags(self, node_catalog, non_service_checks):
         """
         Determines what type of check the object is based on attributes of ServiceID and ServiceName
         If both are blank then the check is not associated to an Application, to know who to alert to
@@ -68,7 +71,12 @@ class ConsulHealthStruct(object):
             else:
                 self.Tags = []
         except TypeError:
-            print "non_service_checks is not an iterable type: {value}".format(value=non_service_checks)
+            ConsulHealthStruct.logger.error(
+                "Message=non_service_checks is not an iterable Type={type}, Value={value}".format(type=type(non_service_checks),
+                                                                                          value=non_service_checks))
             raise
         except AttributeError:
-            print "value within non_service_checks is not a string: {value}".format(value=non_service_checks)
+            ConsulHealthStruct.logger.error(
+                "Message=value within non_service_checks is not a string Type={type}, Value={value}".format(
+                    type=type(non_service_checks),
+                    value=non_service_checks))

@@ -96,7 +96,7 @@ After the script is run, you can always change these within the Consul UI
   "watches": [
     {
       "type": "checks",
-      "handler": "<DESTINATION_FOLDER>/consulalerting/WatchCheckHandler.py"
+      "handler": "<DESTINATION_FOLDER>/consulalerting/WatchCheckHandler.py >> <LOG_FILE_LOCATION>"
     }
   ]
 }
@@ -146,8 +146,9 @@ After the script is run, you can always change these within the Consul UI
 | teams | dict | Create dictionaries within 'teams' for tags corresponding to pagerduty teams, value is service_key |
 
 # TODO
-1. Logging
+1. ~~Logging~~
 2. Improve performance additional profiling
 3. Additional method documentation
 3. Couple more plugins ~~(Pagerduty)~~ etc
 4. Make it easier to add custom plugins
+5. Tox testing with multiple versions of python

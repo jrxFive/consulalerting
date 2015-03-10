@@ -37,14 +37,22 @@ class WatchCheckHandler(Settings):
         """
         try:
             self.health_current = self.consulate_session.health.state("any")
+        except KeyError:
+            WatchCheckHandler.logger.error("Message=Could not obtain current catalog from consul ConsulURI={uri}".format(uri=self.consulate_session._base_uri))
+            raise
+
+        try:
             self.health_check_tags = self.consulate_session.kv[WatchCheckHandler.KV_ALERTING_HEALTH_CHECK_TAGS]
         except KeyError:
+            WatchCheckHandler.logger.error("Message=Could not obtain system check tags from ConsulURI=%{location}".format(location=WatchCheckHandler.KV_ALERTING_HEALTH_CHECK_TAGS))
             raise
+
 
         try:
             self.health_prior = self.consulate_session.kv[WatchCheckHandler.KV_PRIOR_STATE]
         except KeyError:
             self.health_prior = []
+            WatchCheckHandler.logger.warn("Message=No previous prior catalog health found from ConsulURI=%{location}".format(location=WatchCheckHandler.KV_PRIOR_STATE))
 
     def alertsBlacklist(self):
         """
@@ -52,10 +60,22 @@ class WatchCheckHandler(Settings):
         """
         try:
             self.node_blacklist = set(self.consulate_session.kv[WatchCheckHandler.KV_ALERTING_BLACKLIST_NODES])
+        except KeyError:
+            WatchCheckHandler.logger.error("Message=Could not obtain node blacklist from ConsulURI={location}".format(location=WatchCheckHandler.KV_ALERTING_BLACKLIST_NODES))
+            raise
+
+
+        try:
             self.service_blacklist = set(self.consulate_session.kv[WatchCheckHandler.KV_ALERTING_BLACKLIST_SERVICES])
+        except KeyError:
+            WatchCheckHandler.logger.error("Message=Could not obtain service blacklist from ConsulURI={location}".format(location=WatchCheckHandler.KV_ALERTING_BLACKLIST_SERVICES))
+            raise
+
+
+        try:
             self.check_blacklist = set(self.consulate_session.kv[WatchCheckHandler.KV_ALERTING_BLACKLIST_CHECKS])
         except KeyError:
-            print "Consul blacklists do not exist"
+            WatchCheckHandler.logger.error("Message=Could not obtain check blacklist from ConsulURI={location}".format(location=WatchCheckHandler.KV_ALERTING_BLACKLIST_CHECKS))
             raise
 
     def getHashStateSet(self, object_list, state):
@@ -122,6 +142,7 @@ class WatchCheckHandler(Settings):
             return filtered_object_list
 
         except TypeError:
+            WatchCheckHandler.logger.error("Message=Blacklist variables not found")
             raise TypeError("blacklist variables not found")
 
     def createConsulHealthList(self,object_list):
@@ -134,7 +155,7 @@ class WatchCheckHandler(Settings):
             return object_list
 
         except TypeError:
-            print "object_list needs to be an iterable"
+            WatchCheckHandler.logger.error("Message=createConsulHealthList failed, object_list needs to be iterable")
             raise
 
 
@@ -186,6 +207,7 @@ class WatchCheckHandler(Settings):
                     return None
 
             except Exception:
+                WatchCheckHandler.logger.error("Message=Failed to create alert list with no prior catalog")
                 raise
             finally:
                 self.consulate_session.kv[WatchCheckHandler.KV_PRIOR_STATE] = json.dumps(
@@ -246,26 +268,38 @@ class WatchCheckHandler(Settings):
                     return None
 
             except Exception:
+                WatchCheckHandler.logger.error("Message=Failed to create alert list with prior catalog")
                 raise
             finally:
                 self.consulate_session.kv[WatchCheckHandler.KV_PRIOR_STATE] = json.dumps(
                     self.health_current)
 
     def Run(self):
+        WatchCheckHandler.logger.info("Message=Performing consul api lookups")
         self.consulAPILookups()
+        WatchCheckHandler.logger.info("Message=Obtaining blacklists")
         self.alertsBlacklist()
+
+        WatchCheckHandler.logger.info("Message=Obtaining current and prior health")
         health_current_object_list = self.createConsulHealthList(self.health_current)
         health_prior_object_list = self.createConsulHealthList(self.health_prior)
 
+        WatchCheckHandler.logger.info("Message=Filtering current and prior health against blacklists")
         health_current_object_list_filtered = self.filterByBlacklists(
                     health_current_object_list)
 
         health_prior_object_list_filtered = self.filterByBlacklists(
             health_prior_object_list)
 
+
+        WatchCheckHandler.logger.info("Message=Creating alert list")
         alert_list = self.checkForAlertChanges(health_current_object_list_filtered,health_prior_object_list_filtered)
+        WatchCheckHandler.logger.info("Message=AlertsCreated={numAlerts}".format(numAlerts=len(alert_list)))
+
+        WatchCheckHandler.logger.info("Message=Obtaining Tags for new alerts")
         self.nodeCatalogTags(alert_list)
 
+        WatchCheckHandler.logger.info("Message=Returning list of alerts")
         return alert_list
 
 

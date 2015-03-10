@@ -1,3 +1,7 @@
+2015-03-09
+Added logging to WatchCheckHandler, ConsulHealthStruct, NotificationEngine. Logging level is set in Settings.py
+Logging is using a StreamHandler to stdout, pipe to whichever file and have logrotate manage if needed
+
 2015-02-22
 Added pagerduty plugin
 Removed imports for slacker and hipchat, using requests for hipchat,slack,pagerduty
