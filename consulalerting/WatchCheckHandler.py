@@ -294,7 +294,9 @@ class WatchCheckHandler(Settings):
 
         WatchCheckHandler.logger.info("Message=Creating alert list")
         alert_list = self.checkForAlertChanges(health_current_object_list_filtered,health_prior_object_list_filtered)
-        WatchCheckHandler.logger.info("Message=AlertsCreated={numAlerts}".format(numAlerts=len(alert_list)))
+
+        if alert_list:
+            WatchCheckHandler.logger.info("Message=AlertsCreated={numAlerts}".format(numAlerts=len(alert_list)))
 
         WatchCheckHandler.logger.info("Message=Obtaining Tags for new alerts")
         self.nodeCatalogTags(alert_list)
