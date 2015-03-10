@@ -57,7 +57,7 @@ try:
 
     consulate_session.kv["alerting/notify/pagerduty"] = json.dumps(notify_pagerduty)
 
-    consulate_session.kv["alerting/prior/"] = []
+    consulate_session.kv["alerting/prior"] = []
 except TypeError:
     print "One of the python data structures is not JSON serializable, may have accidentally created a set()"
     raise

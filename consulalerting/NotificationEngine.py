@@ -201,12 +201,23 @@ def notify_hipchat(obj, message_template, common_notifiers, consul_hipchat):
             color_value = "gray"
             notify_value = 1
 
-        response = requests.post(consul_hipchat["url"], params={'room_id': int(consul_hipchat["rooms"][roomname]),
+        try:
+            response = requests.post(consul_hipchat["url"], params={'room_id': int(consul_hipchat["rooms"][roomname]),
                                                                 'from': 'Consul',
                                                                 'message': message_template,
                                                                 'notify': notify_value,
                                                                 'color': color_value,
                                                                 'auth_token': consul_hipchat["api_token"]})
+
+        except requests.exceptions.SSLError:
+
+            response = requests.post(consul_hipchat["url"], verify=False, params={'room_id': int(consul_hipchat["rooms"][roomname]),
+                                                                'from': 'Consul',
+                                                                'message': message_template,
+                                                                'notify': notify_value,
+                                                                'color': color_value,
+                                                                'auth_token': consul_hipchat["api_token"]},)
+
 
         if response.status_code == 200:
             NotificationEngine.logger.info(
@@ -223,6 +234,8 @@ def notify_hipchat(obj, message_template, common_notifiers, consul_hipchat):
                     room=consul_hipchat["rooms"][roomname],
                     message=message_template,
                     status=response.status_code))
+
+
 
 
 def notify_slack(message_template, common_notifiers, consul_slack):
@@ -286,13 +299,13 @@ def notify_email(message_template, common_notifiers, consul_email):
     for teamname in common_notifiers:
         body = string.join((
                                "From: %s" % from_address,
-                               "To: %s" % ', '.join(teamname),
+                               "To: %s" % ', '.join(consul_email["teams"][teamname]),
                                "Subject: %s" % subject,
                                "",
                                message_template
                            ), "\r\n")
 
-        server.sendmail(from_address, teamname, body)
+        server.sendmail(from_address, consul_email["teams"][teamname], body)
 
     server.quit()
 
