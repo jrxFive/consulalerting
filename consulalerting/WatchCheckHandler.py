@@ -298,8 +298,8 @@ class WatchCheckHandler(Settings):
         if alert_list:
             WatchCheckHandler.logger.info("Message=AlertsCreated={numAlerts}".format(numAlerts=len(alert_list)))
 
-        WatchCheckHandler.logger.info("Message=Obtaining Tags for new alerts")
-        self.nodeCatalogTags(alert_list)
+            WatchCheckHandler.logger.info("Message=Obtaining Tags for new alerts")
+            self.nodeCatalogTags(alert_list)
 
         WatchCheckHandler.logger.info("Message=Returning list of alerts")
         return alert_list
