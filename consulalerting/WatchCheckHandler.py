@@ -204,7 +204,7 @@ class WatchCheckHandler(Settings):
                 current_state_critical = self.getObjectListByState(
                     health_current_object_list, WatchCheckHandler.CRITICAL_STATE)
 
-                # PUT current health (json) into node/hostname
+                # PUT current health (json)
                 self.consulate_session.kv[WatchCheckHandler.KV_PRIOR_STATE] = json.dumps(
                     self.health_current)
 
