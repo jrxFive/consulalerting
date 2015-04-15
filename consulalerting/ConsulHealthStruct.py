@@ -23,7 +23,8 @@ class ConsulHealthStruct(Settings):
         Tags from /v1/catalog/node/<node>
 
         :param node_catalog, /v1/catalog/node/<node>, dictionary
-        :param non_service_checks, /v1/kv/systemchecks, list, list of tags usually for non service checks
+        :param non_service_checks, /v1/kv/systemchecks, list,
+        list of tags usually for non service checks
         :param **kwargs, unpacked dictionary object of /v1/health/node/<node>
         """
         super(ConsulHealthStruct, self).__init__()
@@ -41,24 +42,39 @@ class ConsulHealthStruct(Settings):
     def __hash__(self):
         """
         Uses key/values from /v1/health/node/<node>,
-        Node,CheckID,Name,ServiceID,ServiceName, Status,Notes,Output are omitted due to that they will change
-        The hash is used to determine if a check was ever in a prior state, in WatchCheckHandler.py
+        Node,CheckID,Name,ServiceID,ServiceName, Status,Notes,Output
+        are omitted due to that they will change. The hash is used to
+        determine if a check was ever in a prior state, in WatchCheckHandler.py
         """
-        return hash((self.Node, self.CheckID, self.Name, self.ServiceID, self.ServiceName))
+        return hash((self.Node,
+                     self.CheckID,
+                     self.Name,
+                     self.ServiceID,
+                     self.ServiceName))
 
     def __eq__(self, other):
-        return (self.Node, self.CheckID, self.Name, self.ServiceID, self.ServiceName) == (
-        other.Node, other.CheckID, other.Name, other.ServiceID, other.ServiceName)
+        return (self.Node,
+                self.CheckID,
+                self.Name,
+                self.ServiceID,
+                self.ServiceName) == (other.Node,
+                                      other.CheckID,
+                                      other.Name,
+                                      other.ServiceID,
+                                      other.ServiceName)
 
     def addTags(self, node_catalog, non_service_checks):
         """
-        Determines what type of check the object is based on attributes of ServiceID and ServiceName
-        If both are blank then the check is not associated to an Application, to know who to alert to
-        use the tags give from non_service_checks, otherwise do a lookup of the tags its associated to
-        based on the catalog dictionary. ensures all the tags are lowercase
+        Determines what type of check the object is based on attributes of
+        ServiceID and ServiceName. If both are blank then the check is not
+        associated to an Application, to know who to alert to use the tags
+        give from non_service_checks, otherwise do a lookup of the tags
+        its associated to based on the catalog dictionary.
+        Ensures all the tags are lowercase
 
         :param node_catalog, /v1/catalog/node/<node>, dictionary
-        :param non_service_checks, /v1/kv/systemchecks, list, list of tags usually for non service checks
+        :param non_service_checks, /v1/kv/systemchecks, list,
+        list of tags usually for non service checks
         """
         if not self.ServiceID and not self.ServiceName:  # Is a system check
             tag_list = non_service_checks
@@ -72,11 +88,14 @@ class ConsulHealthStruct(Settings):
                 self.Tags = []
         except TypeError:
             ConsulHealthStruct.logger.error(
-                "Message=non_service_checks is not an iterable Type={type}, Value={value}".format(type=type(non_service_checks),
-                                                                                          value=non_service_checks))
+                "Message=non_service_checks is not an iterable Type={type}, \
+                Value={value}".format(
+                    type=type(non_service_checks),
+                    value=non_service_checks))
             raise
         except AttributeError:
             ConsulHealthStruct.logger.error(
-                "Message=value within non_service_checks is not a string Type={type}, Value={value}".format(
+                "Message=value within non_service_checks is not a string Type={type}, \
+                Value={value}".format(
                     type=type(non_service_checks),
                     value=non_service_checks))

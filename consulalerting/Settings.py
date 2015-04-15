@@ -27,21 +27,23 @@ class Settings(object):
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.WARN)
 
-    if sys.version_info > (2,6,0):
+    if sys.version_info > (2, 6, 0):
         handler = logging.StreamHandler(strm=sys.stdout)
     else:
         handler = logging.StreamHandler(stream=sys.stdout)
 
-
-
     handler.setLevel(logging.WARN)
 
     formatter = logging.Formatter(
-        '%(asctime)s Filename=%(filename)s Level=%(levelname)s LineNumber=%(lineno)d %(message)s')
+        '%(asctime)s \
+        Filename=%(filename)s \
+        Level=%(levelname)s \
+        LineNumber=%(lineno)d \
+        %(message)s')
+
     handler.setFormatter(formatter)
 
     logger.addHandler(handler)
-
 
     def __init__(self):
         pass
