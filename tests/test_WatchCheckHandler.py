@@ -1,8 +1,9 @@
 #!/usr/bin/env python
+from __future__ import absolute_import
 import unittest
 import simplejson as json
-import consulalerting.WatchCheckHandler
-import consulalerting.ConsulHealthStruct
+from consulalerting.WatchCheckHandler import WatchCheckHandler
+from consulalerting.ConsulHealthStruct import ConsulHealthStruct
 
 
 FOOBAR_CATALOG = json.loads("""{
@@ -83,23 +84,23 @@ class WatchCheckHandlerTests(unittest.TestCase):
 
 
     def setUp(self):
-        self.watch = consulalerting.WatchCheckHandler()
+        self.watch = WatchCheckHandler()
         self.watch.health_current = CURRENT_STATE
         self.watch.health_prior = PRIOR_STATE
 
     def test_CreateConsulHealthNodeList(self):
-        current_obj_list, prior_obj_list = self.watch.createConsulHealthNodeList()
-        self.assertEqual(current_obj_list[0],consulalerting.ConsulHealthStruct(**CURRENT_STATE[0]))
+        current_obj_list = self.watch.createConsulHealthList(CURRENT_STATE)
+        self.assertEqual(current_obj_list[0],ConsulHealthStruct(**CURRENT_STATE[0]))
 
 
     def test_GetObjectListByStateWarning(self):
-        current_obj_list, prior_obj_list = self.watch.createConsulHealthNodeList()
+        current_obj_list = self.watch.createConsulHealthList(CURRENT_STATE)
         current_state_warning = self.watch.getObjectListByState(
                     current_obj_list, self.watch.WARNING_STATE)
         self.assertEqual(0,len(current_state_warning))
 
     def test_GetObjectListByStatePassing(self):
-        current_obj_list, prior_obj_list = self.watch.createConsulHealthNodeList()
+        current_obj_list = self.watch.createConsulHealthList(CURRENT_STATE)
         current_state_warning = self.watch.getObjectListByState(
                     current_obj_list, self.watch.PASSING_STATE)
         self.assertEqual(2,len(current_state_warning))

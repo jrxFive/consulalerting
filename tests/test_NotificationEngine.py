@@ -67,12 +67,12 @@ class NotificationEngineTests(unittest.TestCase):
         self.assertEqual(len(unique_tags),len(set(["devops","consul","mailgun","hipchat","redis","techops","dev","slack","qa","redis-slave"])))
 
 
-    def test_loadPluginsFromTags(self):
-        hipchat,slack,mailgun,email = self.ne.load_plugins_from_tags()
-        self.assertFalse(email)
-        self.assertTrue(hipchat)
-        self.assertFalse(slack)
-        self.assertTrue(mailgun)
+    # def test_loadPluginsFromTags(self):
+    #     hipchat,slack,mailgun,email = self.ne.load_plugins_from_tags()
+    #     self.assertFalse(email)
+    #     self.assertTrue(hipchat)
+    #     self.assertFalse(slack)
+    #     self.assertTrue(mailgun)
 
     def test_commonNotifiers(self):
         common = self.ne.common_notifiers(CONSUL_HEALTH_STRUCT_ALERT_LIST[0],"teams",MAILGUN_NOTIFIER)

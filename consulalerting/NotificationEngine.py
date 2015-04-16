@@ -4,6 +4,7 @@ import consulate
 import simplejson as json
 import smtplib
 import string
+import sys
 from multiprocessing import Process
 from Settings import Settings
 
@@ -37,7 +38,10 @@ class NotificationEngine(Settings):
         """
         super(NotificationEngine, self).__init__()
         self.alert_list = alert_list
-        self.session = consulate.Consulate(consul_host)
+        if sys.version_info > (2, 6, 0):
+            self.session = consulate.Consul(host="0.0.0.0")
+        else:
+            self.session = consulate.Consulate(host="0.0.0.0")
         # eventually load these values some other way
 
     def __getattr__(self, item):

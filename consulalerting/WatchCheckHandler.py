@@ -2,6 +2,7 @@
 
 import consulate
 import simplejson as json
+import sys
 from NotificationEngine import NotificationEngine
 from ConsulHealthStruct import ConsulHealthStruct
 from Settings import Settings
@@ -22,7 +23,10 @@ class WatchCheckHandler(Settings):
         """
         """
         super(WatchCheckHandler, self).__init__()
-        self.consulate_session = consulate.Consulate(host="0.0.0.0")
+        if sys.version_info > (2, 6, 0):
+            self.consulate_session = consulate.Consul(host="0.0.0.0")
+        else:
+            self.consulate_session = consulate.Consulate(host="0.0.0.0")
 
     def __getattr__(self, item):
         return None

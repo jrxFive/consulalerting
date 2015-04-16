@@ -28,9 +28,9 @@ class Settings(object):
     logger.setLevel(logging.WARN)
 
     if sys.version_info > (2, 6, 0):
-        handler = logging.StreamHandler(strm=sys.stdout)
-    else:
         handler = logging.StreamHandler(stream=sys.stdout)
+    else:
+        handler = logging.StreamHandler(strm=sys.stdout)
 
     handler.setLevel(logging.WARN)
 

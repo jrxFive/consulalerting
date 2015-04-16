@@ -46,3 +46,5 @@ Temporary Items
 *.iml
 *.xml
 *.xlsx
+venv/*
+*.pyc
