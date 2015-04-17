@@ -24,10 +24,10 @@ These routes are defined in the Consul KV under alerting/notify/, and can be set
 # Install steps
 
 ```bash
-git clone https://github.com/jrxFive/Consul-Alerting
-cp -r Consul-Alerting/consulalerting <DESTINATION_FOLDER>
+git clone https://github.com/jrxFive/consulalerting
+cp -r consulalerting/consulalerting <DESTINATION_FOLDER>
 # edit ConsulAlertingKVBoostrap.py or setup manually on ConsulKV interface
-python Consul-Alerting/ConsulAlertingKVBoostrap.py
+python consulalerting/ConsulAlertingKVBoostrap.py
 ```
 
 After installing consulalerting in a directory of your choosing, use/edit ConsulAlertingKVBootstrap.py to ensure

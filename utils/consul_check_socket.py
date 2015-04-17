@@ -76,17 +76,31 @@ class SocketCheck(object):
 
 def set_cli_parameters():
     parser = optparse.OptionParser()
-    parser.add_option("--ip", action="store", type="string",
-                      dest="socket_ip", help="IP of socket")
+    parser.add_option(
+        "--ip",
+        action="store",
+        type="string",
+        dest="socket_ip",
+        help="IP of socket")
 
-    parser.add_option("--port", action="store", type="int", dest="socket_port",
-                      help="Port of socket service")
+    parser.add_option(
+        "--port",
+        action="store",
+        type="int",
+        dest="socket_port",
+        help="Port of socket service")
 
-    parser.add_option("--inet", action="store_true", dest="socket_inet",
-                      help="Port of HTTP service if needed", default=True)
+    parser.add_option(
+        "--inet",
+        action="store_true",
+        dest="socket_inet",
+        help="Port of HTTP service if needed", default=True)
 
-    parser.add_option("--unix", action="store_false", dest="socket_unix",
-                      help="Port of HTTP service if needed", default=False)
+    parser.add_option(
+        "--unix",
+        action="store_false",
+        dest="socket_unix",
+        help="Port of HTTP service if needed", default=False)
 
     parser.add_option(
         "--command-input",
