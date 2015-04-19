@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import unittest
-import simplejson as json
+import json as json
 from consulalerting import NotificationEngine
 from consulalerting import ConsulHealthStruct
 
