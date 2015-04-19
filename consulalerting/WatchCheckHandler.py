@@ -23,7 +23,7 @@ class WatchCheckHandler(Settings):
         """
         """
         super(WatchCheckHandler, self).__init__()
-        if sys.version_info >= (2, 7, 0):
+        if sys.version_info >= (2, 6, 0):
             self.consulate_session = consulate.Consul(host="0.0.0.0")
         else:
             self.consulate_session = consulate.Consulate(host="0.0.0.0")
