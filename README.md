@@ -1,4 +1,6 @@
-# Consul Alerting
+![alt text](https://travis-ci.org/jrxFive/consulalerting.svg?branch=master "Travis")
+
+Consul Alerting
 A set of python files for Consul for checks, watches, and notifications. By using tags for services and checks,
 consulalerting will notify the corresponding groups by whichever plugins are also in the tags list. For example
 the redis service has plugins enabled for "hipchat" and will route notifications via hipchat to "devops" and "techops".
