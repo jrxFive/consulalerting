@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import consulate
-import simplejson as json
+import json as json
 import sys
 from NotificationEngine import NotificationEngine
 from ConsulHealthStruct import ConsulHealthStruct

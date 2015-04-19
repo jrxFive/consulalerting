@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import requests
 import consulate
-import simplejson as json
+import json as json
 import smtplib
 import string
 import sys
