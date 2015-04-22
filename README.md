@@ -1,4 +1,4 @@
-![alt text](https://travis-ci.org/jrxFive/consulalerting.svg?branch=master "Travis")
+[![Build Status](https://travis-ci.org/jrxFive/consulalerting.svg?branch=dev)](https://travis-ci.org/jrxFive/consulalerting)
 
 Consul Alerting
 A set of python files for Consul for checks, watches, and notifications. By using tags for services and checks,
