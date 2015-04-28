@@ -1,5 +1,6 @@
 import consulate
-import simplejson as json
+import json
+import sys
 
 blacklist_nodes = []
 blacklist_services = []
@@ -33,8 +34,10 @@ notify_email= {"mail_domain_address":"",
 
 notify_pagerduty= {"teams":{}}
 
-
-consulate_session = consulate.Consulate()
+if sys.version_info >= (2, 6, 0):
+    consulate_session = consulate.Consul(host="0.0.0.0")
+else:
+    consulate_session = consulate.Consulate(host="0.0.0.0")
 
 try:
     consulate_session.kv["alerting/healthchecktags"] = json.dumps(health_check_tags)
