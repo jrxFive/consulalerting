@@ -304,7 +304,7 @@ class WatchCheckHandler(Settings):
                 # intersection
                 from_warn_or_crit_to_pass = health_current_object_set_pass & \
                     health_prior_object_set_warning & \
-                    health_prior_object_set_warning
+                    health_prior_object_set_critical
 
                 # Check for current warning in prior warning,
                 #  if not in prior new alert,
@@ -329,10 +329,6 @@ class WatchCheckHandler(Settings):
                     warning_to_warning_diff | \
                     from_critical_to_warning | \
                     crit_to_crit_diff
-
-                self.consulate_session.kv[
-                    WatchCheckHandler.KV_PRIOR_STATE] = json.dumps(
-                    self.health_current)
 
                 if alert_hash_set:
 
