@@ -78,10 +78,87 @@ PRIOR_STATE = json.loads("""[
 }
 ] """)
 
+CURRENT_STATE_PASSING = json.loads("""[
+{
+"Node": "foobar",
+"CheckID": "service:redis",
+"Name": "Service 'redis' check",
+"Status": "passing",
+"Notes": "",
+"Output": "",
+"ServiceID": "redis",
+"ServiceName": "redis"
+}
+]""")
+
+CURRENT_STATE_WARNING = json.loads("""[
+{
+"Node": "foobar",
+"CheckID": "service:redis",
+"Name": "Service 'redis' check",
+"Status": "warning",
+"Notes": "",
+"Output": "",
+"ServiceID": "redis",
+"ServiceName": "redis"
+}
+]""")
+
+CURRENT_STATE_CRITICAL = json.loads("""[
+{
+"Node": "foobar",
+"CheckID": "service:redis",
+"Name": "Service 'redis' check",
+"Status": "critical",
+"Notes": "",
+"Output": "",
+"ServiceID": "redis",
+"ServiceName": "redis"
+}
+]""")
+
+
+PRIOR_STATE_PASSING = json.loads("""[
+{
+"Node": "foobar",
+"CheckID": "service:redis",
+"Name": "Service 'redis' check",
+"Status": "passing",
+"Notes": "",
+"Output": "",
+"ServiceID": "redis",
+"ServiceName": "redis"
+}
+] """)
+
+PRIOR_STATE_WARNING = json.loads("""[
+{
+"Node": "foobar",
+"CheckID": "service:redis",
+"Name": "Service 'redis' check",
+"Status": "warning",
+"Notes": "",
+"Output": "",
+"ServiceID": "redis",
+"ServiceName": "redis"
+}
+] """)
+
+PRIOR_STATE_CRITICAL = json.loads("""[
+{
+"Node": "foobar",
+"CheckID": "service:redis",
+"Name": "Service 'redis' check",
+"Status": "critical",
+"Notes": "",
+"Output": "",
+"ServiceID": "redis",
+"ServiceName": "redis"
+}
+] """)
+
+
 class WatchCheckHandlerTests(unittest.TestCase):
-
-
-
 
     def setUp(self):
         self.watch = WatchCheckHandler()
@@ -104,6 +181,97 @@ class WatchCheckHandlerTests(unittest.TestCase):
         current_state_warning = self.watch.getObjectListByState(
                     current_obj_list, self.watch.PASSING_STATE)
         self.assertEqual(2,len(current_state_warning))
+
+    def test_FromPassingToPassing(self):
+        self.watch.health_current = CURRENT_STATE_PASSING
+        self.watch.health_prior = PRIOR_STATE_PASSING
+
+        curr = self.watch.createConsulHealthList(self.watch.health_current)
+        prior = self.watch.createConsulHealthList(self.watch.health_prior)
+
+        alert_list = self.watch.checkForAlertChanges(curr,prior)
+        self.assertEqual(alert_list,None)
+
+    def test_FromPassingToWarning(self):
+        self.watch.health_current = CURRENT_STATE_WARNING
+        self.watch.health_prior = PRIOR_STATE_PASSING
+
+        curr = self.watch.createConsulHealthList(self.watch.health_current)
+        prior = self.watch.createConsulHealthList(self.watch.health_prior)
+
+        alert_list = self.watch.checkForAlertChanges(curr,prior)
+        self.assertEqual(1,len(alert_list))
+
+    def test_FromPassingToCritical(self):
+        self.watch.health_current = CURRENT_STATE_CRITICAL
+        self.watch.health_prior = PRIOR_STATE_PASSING
+
+        curr = self.watch.createConsulHealthList(self.watch.health_current)
+        prior = self.watch.createConsulHealthList(self.watch.health_prior)
+
+        alert_list = self.watch.checkForAlertChanges(curr,prior)
+        self.assertEqual(1,len(alert_list))
+
+    def test_FromCriticalToCritical(self):
+        self.watch.health_current = CURRENT_STATE_CRITICAL
+        self.watch.health_prior = PRIOR_STATE_CRITICAL
+
+        curr = self.watch.createConsulHealthList(self.watch.health_current)
+        prior = self.watch.createConsulHealthList(self.watch.health_prior)
+
+        alert_list = self.watch.checkForAlertChanges(curr,prior)
+        self.assertEqual(alert_list,None)
+
+    def test_FromCriticalToWarning(self):
+        self.watch.health_current = CURRENT_STATE_WARNING
+        self.watch.health_prior = PRIOR_STATE_CRITICAL
+
+        curr = self.watch.createConsulHealthList(self.watch.health_current)
+        prior = self.watch.createConsulHealthList(self.watch.health_prior)
+
+        alert_list = self.watch.checkForAlertChanges(curr,prior)
+        self.assertEqual(1,len(alert_list))
+
+    def test_FromCriticalToPassing(self):
+        self.watch.health_current = CURRENT_STATE_PASSING
+        self.watch.health_prior = PRIOR_STATE_CRITICAL
+
+        curr = self.watch.createConsulHealthList(self.watch.health_current)
+        prior = self.watch.createConsulHealthList(self.watch.health_prior)
+
+        alert_list = self.watch.checkForAlertChanges(curr,prior)
+        self.assertEqual(1,len(alert_list))
+
+    def test_FromWarningToWarning(self):
+        self.watch.health_current = CURRENT_STATE_WARNING
+        self.watch.health_prior = PRIOR_STATE_WARNING
+
+        curr = self.watch.createConsulHealthList(self.watch.health_current)
+        prior = self.watch.createConsulHealthList(self.watch.health_prior)
+
+        alert_list = self.watch.checkForAlertChanges(curr,prior)
+        self.assertEqual(alert_list,None)
+
+    def test_FromWarningToPassing(self):
+        self.watch.health_current = CURRENT_STATE_PASSING
+        self.watch.health_prior = PRIOR_STATE_WARNING
+
+        curr = self.watch.createConsulHealthList(self.watch.health_current)
+        prior = self.watch.createConsulHealthList(self.watch.health_prior)
+
+        alert_list = self.watch.checkForAlertChanges(curr,prior)
+        self.assertEqual(1,len(alert_list))
+
+    def test_FromWarningToCritical(self):
+        self.watch.health_current = CURRENT_STATE_CRITICAL
+        self.watch.health_prior = PRIOR_STATE_WARNING
+
+        curr = self.watch.createConsulHealthList(self.watch.health_current)
+        prior = self.watch.createConsulHealthList(self.watch.health_prior)
+
+        alert_list = self.watch.checkForAlertChanges(curr,prior)
+        self.assertEqual(1,len(alert_list))
+
 
 
     def test_filterByBlacklistsExceptions(self):

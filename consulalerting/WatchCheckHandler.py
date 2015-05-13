@@ -241,6 +241,7 @@ class WatchCheckHandler(Settings):
 
         # list is empty, need to put current_health in KV when
         # completed
+
         if not health_prior_object_list:
 
             try:
@@ -302,9 +303,15 @@ class WatchCheckHandler(Settings):
                 # Check for all current passing that were in prior
                 #  warning/critical, set
                 # intersection
-                from_warn_or_crit_to_pass = health_current_object_set_pass & \
-                    health_prior_object_set_warning & \
+                from_crit_to_pass = health_current_object_set_pass & \
                     health_prior_object_set_critical
+
+                # Check for all current passing that were in prior
+                #  warning, set
+                # intersection
+                from_warn_to_pass = health_current_object_set_pass & \
+                    health_prior_object_set_warning
+
 
                 # Check for current warning in prior warning,
                 #  if not in prior new alert,
@@ -325,7 +332,8 @@ class WatchCheckHandler(Settings):
 
                 # combine set results, set union
                 alert_hash_set = health_current_object_set_unknown | \
-                    from_warn_or_crit_to_pass | \
+                    from_crit_to_pass | \
+                    from_warn_to_pass | \
                     warning_to_warning_diff | \
                     from_critical_to_warning | \
                     crit_to_crit_diff
