@@ -25,7 +25,7 @@ Options:
 
 Examples:
 	http -ip 10.0.2.15 -port 8000 -endpoint /admin
-	http --ip=10.0.2.15 --port=8000
+	http --ip=10.0.2.15 --port=8000 
 	http -address=www.google.com
 	http --address=www.yahoo.com
 `
@@ -74,12 +74,12 @@ func httpmain() int {
 	}
 
 	if resp.StatusCode != 200 {
-		fmt.Fprintf(os.Stdout, "Address: %s, Response: %s\n", addr, resp.Status)
+		fmt.Fprintf(os.Stdout, "Address: %s, Response: %s", addr, resp.Status)
 		return 2
-	} else {
-		fmt.Fprintf(os.Stdout, "Address: %s, Response: %s\n", addr, resp.Status)
-		return 0
 	}
+
+	fmt.Fprintf(os.Stdout, "Address: %s, Response: %s", addr, resp.Status)
+	return 0
 
 }
 

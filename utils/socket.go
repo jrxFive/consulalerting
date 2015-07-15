@@ -80,7 +80,7 @@ func socketmain() int {
 	conn, err := net.DialTCP(socketNetwork, nil, raddr)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error occured connecting or possible timeout Addr:%s\n", addr)
-		fmt.Println(os.Stderr, err)
+		fmt.Fprintln(os.Stderr, err)
 		return 2
 	}
 	defer conn.Close()
@@ -95,20 +95,19 @@ func socketmain() int {
 		_, err = conn.Read(r)
 		checkPrintError(err)
 
-		if strings.Contains(string(r),string(socketOutput)) {
-			fmt.Fprintf(os.Stdout, "Returned output: %s, Expected output:%s\n", r, socketOutput)
+		if strings.Contains(string(r), string(socketOutput)) {
+			fmt.Fprintf(os.Stdout, "Returned output: %s, Expected output:%s\n", string(r), socketOutput)
 			return 0
-		} else {
-			fmt.Fprintf(os.Stdout, "Returned output: %s, Expected output:%s\n", r, socketOutput)
-			return 2
 		}
+		fmt.Fprintf(os.Stdout, "Returned output: %s, Expected output:%s\n", string(r), socketOutput)
+		return 2
 	}
 
 }
 
 func checkPrintError(err error) {
 	if err != nil {
-		fmt.Println(os.Stderr, err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(2)
 	}
 }
