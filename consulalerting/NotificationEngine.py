@@ -52,15 +52,16 @@ class NotificationEngine(Settings):
             self.available_plugins = set(
                 self.session.kv[
                     NotificationEngine.KV_ALERTING_AVAILABLE_PLUGINS])
+
             NotificationEngine.logger.info(
                 "Plugins available, Plugins={plug}".format(
-                    plug=list(
-                        self.available_plugins)))
+                    plug=list(self.available_plugins)))
+
             return self.available_plugins
         except TypeError:
             NotificationEngine.logger.error(
-                "Could not obtain alerting \
-                plugins from ConsulURI=%{location}".format(
+                "Could not obtain alerting"
+                "plugins from ConsulURI=%{location}".format(
                     location=NotificationEngine.KV_ALERTING_AVAILABLE_PLUGINS))
             raise
 
@@ -73,8 +74,8 @@ class NotificationEngine(Settings):
         self.unique_tags = set(
             tag for obj in self.alert_list for tag in obj.Tags)
 
-        NotificationEngine.logger.info("Unique tags found,\
-         Tags={tags}".format(tags=list(self.unique_tags)))
+        NotificationEngine.logger.info("Unique tags found,"
+                                       "Tags={tags}".format(tags=list(self.unique_tags)))
 
         return self.unique_tags
 
@@ -84,33 +85,28 @@ class NotificationEngine(Settings):
             self.available_plugins)
 
         NotificationEngine.logger.info(
-            "Configuration files to load,\
-             Configurations={configs}".format(configs=list(configurations_files_to_load)))
+            "Configuration files to load,"
+            "Configurations={configs}".format(configs=list(configurations_files_to_load)))
 
         if "hipchat" in configurations_files_to_load:
             self.hipchat = self.load_plugin(
-                NotificationEngine.KV_ALERTING_NOTIFY_HIPCHAT,
-                "rooms")
+                NotificationEngine.KV_ALERTING_NOTIFY_HIPCHAT, "rooms")
 
         if "slack" in configurations_files_to_load:
             self.slack = self.load_plugin(
-                NotificationEngine.KV_ALERTING_NOTIFY_SLACK,
-                "rooms")
+                NotificationEngine.KV_ALERTING_NOTIFY_SLACK, "rooms")
 
         if "mailgun" in configurations_files_to_load:
             self.mailgun = self.load_plugin(
-                NotificationEngine.KV_ALERTING_NOTIFY_MAILGUN,
-                "teams")
+                NotificationEngine.KV_ALERTING_NOTIFY_MAILGUN, "teams")
 
         if "email" in configurations_files_to_load:
             self.email = self.load_plugin(
-                NotificationEngine.KV_ALERTING_NOTIFY_EMAIL,
-                "teams")
+                NotificationEngine.KV_ALERTING_NOTIFY_EMAIL, "teams")
 
         if "pagerduty" in configurations_files_to_load:
             self.pagerduty = self.load_plugin(
-                NotificationEngine.KV_ALERTING_NOTIFY_PAGERDUTY,
-                "teams")
+                NotificationEngine.KV_ALERTING_NOTIFY_PAGERDUTY, "teams")
 
         return (self.hipchat, self.slack, self.mailgun,
                 self.email, self.pagerduty)
@@ -130,10 +126,8 @@ class NotificationEngine(Settings):
         # Convert Keys to lower case
         plugin = NotificationEngine.dict_keys_to_low(plugin)
 
-        plugin[tags_dictname] = dict(
-            (key.lower(),
-             value) for key,
-            value in plugin[tags_dictname].iteritems())
+        plugin[tags_dictname] = dict((key.lower(), value) for key,
+                                     value in plugin[tags_dictname].iteritems())
 
         return plugin
 
@@ -149,21 +143,21 @@ class NotificationEngine(Settings):
 
         if obj.ServiceName or obj.ServiceID:
 
-            message_template = "Service {name}: \
-            is in a {state} state on {node}. \
-            Output from test: {output}".format(name=obj.ServiceName,
-                                               state=obj.Status,
-                                               node=obj.Node,
-                                               output=obj.Output)
+            message_template = "Service {name}: "\
+                "is in a {state} state on {node}. "\
+                "Output from check: {output}".format(name=obj.ServiceName,
+                                                     state=obj.Status,
+                                                     node=obj.Node,
+                                                     output=obj.Output)
 
         else:
 
-            message_template = "System Check {name}: is \
-            in a {state} state on {node}. \
-            Output from test: {output}".format(name=obj.CheckID,
-                                               state=obj.Status,
-                                               node=obj.Node,
-                                               output=obj.Output)
+            message_template = "System Check {name}: is "\
+                "in a {state} state on {node}. "\
+                "Output from check: {output}".format(name=obj.CheckID,
+                                                     state=obj.Status,
+                                                     node=obj.Node,
+                                                     output=obj.Output)
 
         return message_template
 
@@ -173,64 +167,42 @@ class NotificationEngine(Settings):
 
         if "hipchat" in obj.Tags and self.hipchat:
             common_notifiers = self.common_notifiers(
-                obj,
-                "rooms",
-                self.hipchat)
+                obj, "rooms", self.hipchat)
             hipchat = self.hipchat
-            Process(
-                target=notify_hipchat,
-                args=(
-                    obj,
-                    message_template,
-                    common_notifiers,
-                    hipchat)).start()
+            Process(target=notify_hipchat, args=(obj, message_template,
+                                                 common_notifiers,
+                                                 hipchat)).start()
 
         if "slack" in obj.Tags and self.slack:
             common_notifiers = self.common_notifiers(obj, "rooms", self.slack)
             slack = self.slack
-            Process(
-                target=notify_slack,
-                args=(
-                    message_template,
-                    common_notifiers,
-                    slack)).start()
+            Process(target=notify_slack, args=(message_template,
+                                               common_notifiers,
+                                               slack)).start()
 
         if "mailgun" in obj.Tags and self.mailgun:
             common_notifiers = self.common_notifiers(
-                obj,
-                "teams",
-                self.mailgun)
+                obj, "teams", self.mailgun)
             mailgun = self.mailgun
-            Process(
-                target=notify_mailgun,
-                args=(
-                    message_template,
-                    common_notifiers,
-                    mailgun)).start()
+            Process(target=notify_mailgun, args=(message_template,
+                                                 common_notifiers,
+                                                 mailgun)).start()
 
         if "email" in obj.Tags and self.email:
             common_notifiers = self.common_notifiers(obj, "teams", self.email)
             email = self.email
-            Process(
-                target=notify_email,
-                args=(
-                    message_template,
-                    common_notifiers,
-                    email)).start()
+            Process(target=notify_email, args=(message_template,
+                                               common_notifiers,
+                                               email)).start()
 
         if "pagerduty" in obj.Tags and self.pagerduty:
             common_notifiers = self.common_notifiers(
-                obj,
-                "teams",
-                self.pagerduty)
+                obj, "teams", self.pagerduty)
             pagerduty = self.pagerduty
-            Process(
-                target=notify_pagerduty,
-                args=(
-                    obj,
-                    message_template,
-                    common_notifiers,
-                    pagerduty)).start()
+            Process(target=notify_pagerduty, args=(obj,
+                                                   message_template,
+                                                   common_notifiers,
+                                                   pagerduty)).start()
 
     def Run(self):
         self.get_available_plugins()
@@ -267,8 +239,7 @@ def notify_hipchat(obj, message_template, common_notifiers, consul_hipchat):
             response = requests.post(
                 consul_hipchat["url"],
                 params={
-                    'room_id': int(
-                        consul_hipchat["rooms"][roomname]),
+                    'room_id': int(consul_hipchat["rooms"][roomname]),
                     'from': 'Consul',
                     'message': message_template,
                     'notify': notify_value,
@@ -281,8 +252,7 @@ def notify_hipchat(obj, message_template, common_notifiers, consul_hipchat):
                 consul_hipchat["url"],
                 verify=False,
                 params={
-                    'room_id': int(
-                        consul_hipchat["rooms"][roomname]),
+                    'room_id': int(consul_hipchat["rooms"][roomname]),
                     'from': 'Consul',
                     'message': message_template,
                     'notify': notify_value,
@@ -292,18 +262,18 @@ def notify_hipchat(obj, message_template, common_notifiers, consul_hipchat):
 
         if response.status_code == 200:
             NotificationEngine.logger.info(
-                "NotifyPlugin=Hipchat Server={url} \
-                Room={room} Message={message} \
-                Status_Code={status}".format(
+                "NotifyPlugin=Hipchat Server={url} "
+                "Room={room} Message={message} "
+                "Status_Code={status}".format(
                     url=consul_hipchat["url"],
                     room=consul_hipchat["rooms"][roomname],
                     message=message_template,
                     status=response.status_code))
         else:
             NotificationEngine.logger.error(
-                "NotifyPlugin=Hipchat Server={url} \
-                Room={room} Message={message} \
-                Status_Code={status}".format(
+                "NotifyPlugin=Hipchat Server={url} "
+                "Room={room} Message={message} "
+                "Status_Code={status}".format(
                     url=consul_hipchat["url"],
                     room=consul_hipchat["rooms"][roomname],
                     message=message_template,
@@ -323,19 +293,19 @@ def notify_slack(message_template, common_notifiers, consul_slack):
 
         if response.status_code == 200:
             NotificationEngine.logger.info(
-                "NotifyPlugin=Slack \
-                Room={room} \
-                Message={message} \
-                Status_Code={status}".format(
+                "NotifyPlugin=Slack "
+                "Room={room} "
+                "Message={message} "
+                "Status_Code={status}".format(
                     room=consul_slack["rooms"][roomname],
                     message=message_template,
                     status=response.status_code))
         else:
             NotificationEngine.logger.error(
-                "NotifyPlugin=Slack \
-                Room={room} \
-                Message={message} \
-                Status_code={status}".format(
+                "NotifyPlugin=Slack "
+                "Room={room} "
+                "Message={message} "
+                "Status_code={status}".format(
                     room=consul_slack["rooms"][roomname],
                     message=message_template,
                     status=response.status_code))
@@ -357,21 +327,19 @@ def notify_mailgun(message_template, common_notifiers, consul_mailgun):
 
         if response.status_code == 200:
             NotificationEngine.logger.info(
-                "NotifyPlugin=Mailgun \
-                Endpoint={url} Message={message} \
-                Status_Code={status}".format(
-                    url=api_endpoint,
-                    message=message_template,
-                    status=response.status_code))
+                "NotifyPlugin=Mailgun "
+                "Endpoint={url} Message={message} "
+                "Status_Code={status}".format(url=api_endpoint,
+                                              message=message_template,
+                                              status=response.status_code))
         else:
             NotificationEngine.logger.error(
-                "NotifyPlugin=Mailgun \
-                Endpoint={url} \
-                Message={message} \
-                Status_code={status}".format(
-                    url=api_endpoint,
-                    message=message_template,
-                    status=response.status_code))
+                "NotifyPlugin=Mailgun "
+                "Endpoint={url} "
+                "Message={message} "
+                "Status_code={status}".format(url=api_endpoint,
+                                              message=message_template,
+                                              status=response.status_code))
 
 
 def notify_email(message_template, common_notifiers, consul_email):
@@ -412,26 +380,22 @@ def notify_pagerduty(
         pagerduty_data = {"service_key": consul_pagerduty["teams"][teamname],
                           "event_type": pagerduty_event_type,
                           "description": message_template,
-                          "incident_key": pagerduty_incident_key
-                          }
+                          "incident_key": pagerduty_incident_key}
 
         response = requests.post(
             "https://events.pagerduty.com/generic/2010-04-15/create_event.json",
             data=json.dumps(pagerduty_data),
-            headers={
-                'content-type': 'application/json'})
+            headers={'content-type': 'application/json'})
 
         if response.status_code == 200:
             NotificationEngine.logger.info(
-                "NotifyPlugin=PagerDuty \
-                Message={message} \
-                Status_Code={status}".format(
-                    message=message_template,
-                    status=response.status_code))
+                "NotifyPlugin=PagerDuty "
+                "Message={message} "
+                "Status_Code={status}".format(message=message_template,
+                                              status=response.status_code))
         else:
             NotificationEngine.logger.error(
-                "NotifyPlugin=Mailgun \
-                Message={message} \
-                Status_Code={status}".format(
-                    message=message_template,
-                    status=response.status_code))
+                "NotifyPlugin=Mailgun "
+                "Message={message} "
+                "Status_Code={status}".format(message=message_template,
+                                              status=response.status_code))

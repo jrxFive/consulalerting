@@ -2,6 +2,7 @@ from Settings import Settings
 
 
 class ConsulHealthStruct(Settings):
+
     """
     A Python Object representation of Consul /v1/health/node/<node>
       {
@@ -88,14 +89,14 @@ class ConsulHealthStruct(Settings):
                 self.Tags = []
         except TypeError:
             ConsulHealthStruct.logger.error(
-                "Message=non_service_checks is not an iterable Type={type}, \
-                Value={value}".format(
+                "Message=non_service_checks is not an iterable Type={type},"
+                "Value={value}".format(
                     type=type(non_service_checks),
                     value=non_service_checks))
             raise
         except AttributeError:
             ConsulHealthStruct.logger.error(
-                "Message=value within non_service_checks is not a string Type={type}, \
-                Value={value}".format(
+                "Message=value within non_service_checks is not a string Type={type},"
+                "Value={value}".format(
                     type=type(non_service_checks),
                     value=non_service_checks))
