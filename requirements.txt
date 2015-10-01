@@ -1,5 +1,5 @@
 requests
 tornado
-consulate
+consulate==0.4.0
 influxdb
 simplejson
