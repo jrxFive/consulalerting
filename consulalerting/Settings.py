@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import sys
 import logging
 
@@ -34,7 +35,7 @@ class Settings(object):
 
     handler.setLevel(logging.WARN)
 
-    formatter = logging.Formatter("% (asctime)s Filename= % (filename)s Level= % (levelname)s "
+    formatter = logging.Formatter("%(asctime)s Filename= %(filename)s Level= %(levelname)s "
                                   "LineNumber=%(lineno)d %(message)s")
 
     handler.setFormatter(formatter)

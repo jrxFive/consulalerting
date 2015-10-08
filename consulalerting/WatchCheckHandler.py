@@ -55,7 +55,7 @@ class WatchCheckHandler(Settings):
             WatchCheckHandler.logger.debug("HealthCheckTags={tags}".format(
                 tags=self.health_check_tags))
         except KeyError:
-            WatchCheckHandler.logger.error("Message=Could not obtain system check tags from "
+            WatchCheckHandler.logger.warn("Message=Could not obtain system check tags from "
                                            "ConsulURI={location}".format(
                                                location=WatchCheckHandler.KV_ALERTING_HEALTH_CHECK_TAGS))
             raise

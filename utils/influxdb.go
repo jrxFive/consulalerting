@@ -38,12 +38,12 @@ Options:
 Examples:
 	influxdb08 -ip="0.0.0.0" -series="servers.consulalerting.cpu.total.idle" -mean -delta=500 -database="db" -critical=200
 `
+
 //Used for Points First Array
 const TIME int = 0
 
 //Used for Points Second Array
 const VALUE int = 1
-
 
 //InfluxResponse,Influxdb0.8 HTTP GET representation of JSON
 type InfluxResponse struct {
@@ -181,7 +181,7 @@ func thresholdChecker(ir []InfluxResponse, lessthan bool, warningValue, critical
 }
 
 func queryBuilder(functionName string, series string, delta int) string {
-	return fmt.Sprintf("select %s(value) from %s where time > now() - %ds", functionName, series, delta)
+	return fmt.Sprintf("select %s(value) from \"%s\" where time > now() - %ds", functionName, series, delta)
 }
 
 func createQuery(series, custom string, delta int, count, min, max, mean, mode, derivative, sum, stddev, first bool) (string, error) {
