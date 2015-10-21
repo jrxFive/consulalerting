@@ -156,3 +156,4 @@ After the script is run, you can always change these within the Consul UI
 * ~~Wildcard blacklist~~
 * Improve KVBootstrap.py
 * Integration tests
+* Improve code coverage

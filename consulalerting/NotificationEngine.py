@@ -6,6 +6,7 @@ import string
 import sys
 import settings
 import plugins
+import utilities
 from multiprocessing import Process
 
 
@@ -83,55 +84,27 @@ class NotificationEngine(object):
             "Configurations={configs}".format(configs=list(configurations_files_to_load)))
 
         if "hipchat" in configurations_files_to_load:
-            self.hipchat = self.load_plugin(
+            self.hipchat = utilities.load_plugin(
                 settings.KV_ALERTING_NOTIFY_HIPCHAT, "rooms")
 
         if "slack" in configurations_files_to_load:
-            self.slack = self.load_plugin(
+            self.slack = utilities.load_plugin(
                 settings.KV_ALERTING_NOTIFY_SLACK, "rooms")
 
         if "mailgun" in configurations_files_to_load:
-            self.mailgun = self.load_plugin(
+            self.mailgun = utilities.load_plugin(
                 settings.KV_ALERTING_NOTIFY_MAILGUN, "teams")
 
         if "email" in configurations_files_to_load:
-            self.email = self.load_plugin(
+            self.email = utilities.load_plugin(
                 settings.KV_ALERTING_NOTIFY_EMAIL, "teams")
 
         if "pagerduty" in configurations_files_to_load:
-            self.pagerduty = self.load_plugin(
+            self.pagerduty = utilities.load_plugin(
                 settings.KV_ALERTING_NOTIFY_PAGERDUTY, "teams")
 
         return (self.hipchat, self.slack, self.mailgun,
                 self.email, self.pagerduty)
-
-    @staticmethod
-    def dict_keys_to_low(dictionary):
-        dict_keys_lowercase = dict((key.lower(), value)
-                                   for key, value in dictionary.iteritems())
-
-        return dict_keys_lowercase
-
-    def load_plugin(self, KV_LOCATION, tags_dictname):
-        # get request to 0.0.0.0:8500/v1/kv/notify/<plugin_name>
-        #  which routes to consul master
-        plugin = json.loads(self.consul.kv[KV_LOCATION])
-
-        # Convert Keys to lower case
-        plugin = NotificationEngine.dict_keys_to_low(plugin)
-
-        plugin[tags_dictname] = dict((key.lower(), value) for key,
-                                     value in plugin[tags_dictname].iteritems())
-
-        return plugin
-
-    def common_notifiers(self, obj, kv_tags_dictname, kv_dict):
-        keynames = set(kv_dict[kv_tags_dictname].keys())
-        obj_tags = set(obj.Tags)
-
-        common = keynames.intersection(obj_tags)
-
-        return common
 
     def message_pattern(self, obj):
 
@@ -160,43 +133,45 @@ class NotificationEngine(object):
         message_template = self.message_pattern(obj)
 
         if "hipchat" in obj.Tags and self.hipchat:
-            common_notifiers = self.common_notifiers(
+            common_notifiers = utilities.common_notifiers(
                 obj, "rooms", self.hipchat)
             hipchat = self.hipchat
             Process(target=plugins.notify_hipchat, args=(obj, message_template,
-                                                 common_notifiers,
-                                                 hipchat)).start()
+                                                         common_notifiers,
+                                                         hipchat)).start()
 
         if "slack" in obj.Tags and self.slack:
-            common_notifiers = self.common_notifiers(obj, "rooms", self.slack)
+            common_notifiers = utilities.common_notifiers(
+                obj, "rooms", self.slack)
             slack = self.slack
-            Process(target=plugins.notify_slack, args=(message_template,
-                                               common_notifiers,
-                                               slack)).start()
+            _ = Process(target=plugins.notify_slack, args=(message_template,
+                                                       common_notifiers,
+                                                       slack)).start()
 
         if "mailgun" in obj.Tags and self.mailgun:
-            common_notifiers = self.common_notifiers(
+            common_notifiers = utilities.common_notifiers(
                 obj, "teams", self.mailgun)
             mailgun = self.mailgun
-            Process(target=plugins.notify_mailgun, args=(message_template,
-                                                 common_notifiers,
-                                                 mailgun)).start()
+            _ = Process(target=plugins.notify_mailgun, args=(message_template,
+                                                         common_notifiers,
+                                                         mailgun)).start()
 
         if "email" in obj.Tags and self.email:
-            common_notifiers = self.common_notifiers(obj, "teams", self.email)
+            common_notifiers = utilities.common_notifiers(
+                obj, "teams", self.email)
             email = self.email
-            Process(target=plugins.notify_email, args=(message_template,
-                                               common_notifiers,
-                                               email)).start()
+            _ = Process(target=plugins.notify_email, args=(message_template,
+                                                       common_notifiers,
+                                                       email)).start()
 
         if "pagerduty" in obj.Tags and self.pagerduty:
-            common_notifiers = self.common_notifiers(
+            common_notifiers = utilities.common_notifiers(
                 obj, "teams", self.pagerduty)
             pagerduty = self.pagerduty
-            Process(target=plugins.notify_pagerduty, args=(obj,
-                                                   message_template,
-                                                   common_notifiers,
-                                                   pagerduty)).start()
+            _ = Process(target=plugins.notify_pagerduty, args=(obj,
+                                                           message_template,
+                                                           common_notifiers,
+                                                           pagerduty)).start()
 
     def Run(self):
         self.get_available_plugins()

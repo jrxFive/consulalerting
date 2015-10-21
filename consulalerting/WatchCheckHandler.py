@@ -17,7 +17,7 @@ class WatchCheckHandler(object):
     as a list of ConsulHealthStruct.
 
     When running checkForAlertChanges, current state will be
-    filtered by blacklists in Consul KV
+    filtered by blacklists in Consul KV.
     """
 
     def __init__(self, consulate_session):
@@ -30,7 +30,12 @@ class WatchCheckHandler(object):
 
     def filterByBlacklists(self, object_list):
         """
-        Filter a list of ConsulHealthStruct by the blacklists in the KV
+        Filter a list of ConsulHealthStruct by the blacklists in the KV.
+
+        Returns:
+          filtered_object_list: Removal of flagged blacklist catalog
+        Raises:
+          TypeError: when a blacklist does not exist within the object
         """
         try:
             filtered_object_list = []
@@ -66,7 +71,7 @@ class WatchCheckHandler(object):
         catalog for each 'Node' to associate service tags for
         NotificationEngine to determine who to alert. Consul checks not
         associated to application or services do not have tags, used list
-        of check_tags or the Consul KV check tags to determine who to notify
+        of check_tags or the Consul KV check tags to determine who to notify.
         """
         if not health_check_tags:
             health_check_tags = self.health_check_tags
@@ -204,41 +209,46 @@ class WatchCheckHandler(object):
                 raise
 
     def Run(self):
+        """ Performs the internal operations to create an alert_list
+        if there is one at all. Will not run if another consulalerting
+        instance has acquired a lock on the same catalog
+
+        Returns:
+          alert_list: A list of ConsulHealthChecks to notify on or blank list
+        """
         settings.logger.info("Message=Performing consul api lookups")
 
-        self.health_current = utilities.currentState(
-            self.consul)
+        self.health_current = utilities.currentState()
 
         currMD5Hash = utilities.getHash(self.health_current)
-        session_id = utilities.createSession(self.consul)
+        session_id = utilities.createSession()
 
-        lock_result = utilities.acquireLock(self.consul, "{k}/{h}".format(k=settings.KV_ALERTING_HASHES,
-                                                                          h=currMD5Hash), session_id)
+        lock_result = utilities.acquireLock("{k}/{h}".format(k=settings.KV_ALERTING_HASHES,
+                                                             h=currMD5Hash), session_id)
 
         if not lock_result:
             settings.logger.info("Message=Other consul alerting instance"
                                  "Processing alert and notifcation")
-            sys.exit(0)
+            return []
 
         self.consul.kv[settings.KV_PRIOR_STATE] = json.dumps(
             self.health_current)
 
-        self.health_prior = utilities.priorState(self.consul,
-                                                 settings.KV_PRIOR_STATE)
+        self.health_prior = utilities.priorState(settings.KV_PRIOR_STATE)
 
         self.health_check_tags = utilities.getCheckTags(self.conul,
                                                         settings.KV_ALERTING_HEALTH_CHECK_TAGS)
 
         settings.logger.info("Message=Obtaining blacklists")
 
-        self.node_blacklist = utilities.getBlacklist(self.consul,
-                                                     settings.KV_ALERTING_BLACKLIST_NODES)
+        self.node_blacklist = utilities.getBlacklist(
+            settings.KV_ALERTING_BLACKLIST_NODES)
 
-        self.service_blacklist = utilities.getBlacklist(self.consul,
-                                                        settings.KV_ALERTING_BLACKLIST_SERVICES)
+        self.service_blacklist = utilities.getBlacklist(
+            settings.KV_ALERTING_BLACKLIST_SERVICES)
 
-        self.check_blacklist = utilities.getBlacklist(self.consul,
-                                                      settings.KV_ALERTING_BLACKLIST_CHECKS)
+        self.check_blacklist = utilities.getBlacklist(
+            settings.KV_ALERTING_BLACKLIST_CHECKS)
 
         settings.logger.info("Message=Creating current and prior health "
                              "ConsulHealthStruct lists")

@@ -1,5 +1,6 @@
 import requests
 import settings
+import json as json
 
 def notify_hipchat(obj, message_template, common_notifiers, consul_hipchat):
     notify_value = 0
@@ -57,6 +58,8 @@ def notify_hipchat(obj, message_template, common_notifiers, consul_hipchat):
                     room=consul_hipchat["rooms"][roomname],
                     message=message_template,
                     status=response.status_code))
+
+            return response.status_code
         else:
             settings.logger.error(
                 "NotifyPlugin=Hipchat Server={url} "
@@ -66,6 +69,8 @@ def notify_hipchat(obj, message_template, common_notifiers, consul_hipchat):
                     room=consul_hipchat["rooms"][roomname],
                     message=message_template,
                     status=response.status_code))
+
+            return response.status_code
 
 
 def notify_slack(message_template, common_notifiers, consul_slack):
@@ -88,6 +93,8 @@ def notify_slack(message_template, common_notifiers, consul_slack):
                     room=consul_slack["rooms"][roomname],
                     message=message_template,
                     status=response.status_code))
+
+            return response.status_code
         else:
             settings.logger.error(
                 "NotifyPlugin=Slack "
@@ -97,6 +104,7 @@ def notify_slack(message_template, common_notifiers, consul_slack):
                     room=consul_slack["rooms"][roomname],
                     message=message_template,
                     status=response.status_code))
+            return response.status_code
 
 
 def notify_mailgun(message_template, common_notifiers, consul_mailgun):
@@ -120,6 +128,8 @@ def notify_mailgun(message_template, common_notifiers, consul_mailgun):
                 "Status_Code={status}".format(url=api_endpoint,
                                               message=message_template,
                                               status=response.status_code))
+
+            return response.status_code
         else:
             settings.logger.error(
                 "NotifyPlugin=Mailgun "
@@ -128,6 +138,7 @@ def notify_mailgun(message_template, common_notifiers, consul_mailgun):
                 "Status_code={status}".format(url=api_endpoint,
                                               message=message_template,
                                               status=response.status_code))
+            return response.status_code
 
 
 def notify_email(message_template, common_notifiers, consul_email):
@@ -175,15 +186,18 @@ def notify_pagerduty(
             data=json.dumps(pagerduty_data),
             headers={'content-type': 'application/json'})
 
+
         if response.status_code == 200:
             settings.logger.info(
                 "NotifyPlugin=PagerDuty "
                 "Message={message} "
                 "Status_Code={status}".format(message=message_template,
                                               status=response.status_code))
+            return response.status_code
         else:
             settings.logger.error(
                 "NotifyPlugin=Mailgun "
                 "Message={message} "
                 "Status_Code={status}".format(message=message_template,
                                               status=response.status_code))
+            return response.status_code

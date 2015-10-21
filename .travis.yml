@@ -8,7 +8,7 @@ before_install:
     - ./consul agent -server -bootstrap-expect 1 -data-dir /tmp/consul &
     - pip install codecov
 # command to install dependencies
-install: "pip install -r requirements.txt"
+install: "pip install -r requirements-dev.txt"
 # command to run tests
 script: 
   - python ConsulAlertingKVBootstrap.py

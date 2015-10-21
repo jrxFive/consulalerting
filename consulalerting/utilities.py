@@ -6,20 +6,20 @@ import settings
 from ConsulHealthStruct import ConsulHealthStruct
 
 
-def currentState(consul):
+def currentState():
     try:
-        current = consul.health.state("any")
+        current = settings.consul.health.state("any")
         settings.logger.debug("CurrentConsulHealth={health}".format(health=current))
 
         return current
     except KeyError:
         settings.logger.error("Message=Could no obtain current catalog from consul"
-                     "ConsulURI={u}".format(u=consul._base_uri))
+                     "ConsulURI={u}".format(u=settings.consul._base_uri))
 
 
-def priorState(consul, key):
+def priorState(key):
     try:
-        prior = consul.kv[key]
+        prior = settings.consul.kv[key]
         settings.logger.debug("PriorConsulHealth={health}".format(
             health=prior))
 
@@ -32,9 +32,9 @@ def priorState(consul, key):
         return prior
 
 
-def getCheckTags(consul, key):
+def getCheckTags(key):
     try:
-        tags = consul.kv[key]
+        tags = settings.consul.kv[key]
         settings.logger.debug("HealthCheckTags={tags}".format(
             tags=tags))
 
@@ -49,38 +49,38 @@ def getCheckTags(consul, key):
 
 
 
-def createSession(consul):
-    return consul.session.create(ttl='10s', delay='0s', behavior='delete')
+def createSession():
+    return settings.consul.session.create(ttl='10s', delay='0s', behavior='delete')
 
 
 def getHash(currentState):
     return hashlib.md5(str(currentState)).hexdigest()
 
 
-def checkForKey(consul, key):
-    return key in consul.kv
+def checkForKey(key):
+    return key in settings.consul.kv
 
 
-def putKey(consul, key, value):
+def putKey(key, value):
 
     try:
-        consul.kv[key] = value
+        settings.consul.kv[key] = value
     except:
         pass
 
 
-def acquireLock(consul, key, session_id):
+def acquireLock(key, session_id):
 
-    return consul.kv.acquire_lock(key, session_id)
+    return settings.consul.kv.acquire_lock(key, session_id)
 
 
-def getBlacklist(consul, key):
+def getBlacklist(key):
 
     try:
-        bl = consul.kv[key]
+        bl = settings.consul.kv[key]
         settings.logger.debug("Key={k} Tags={t}".format(k=key, t=bl))
 
-        return bl
+        return json.loads(bl)
 
     except KeyError:
         settings.logger.warn("Message=Could not obtain node blacklist from "
@@ -118,3 +118,33 @@ def getObjectListByState(object_list, state):
     """
     return filter(
         lambda obj: obj.Status == state, object_list)
+
+
+def common_notifiers(obj, kv_tags_dictname, kv_dict):
+    keynames = set(kv_dict[kv_tags_dictname].keys())
+    obj_tags = set(obj.Tags)
+
+    common = keynames.intersection(obj_tags)
+
+    return common
+
+
+def load_plugin(KV_LOCATION, tags_dictname):
+    # get request to 0.0.0.0:8500/v1/kv/notify/<plugin_name>
+    #  which routes to consul master
+    plugin = json.loads(settings.consul.kv[KV_LOCATION])
+
+    # Convert Keys to lower case
+    plugin = _dict_keys_to_low(plugin)
+
+    plugin[tags_dictname] = dict((key.lower(), value) for key,
+                                 value in plugin[tags_dictname].iteritems())
+
+    return plugin
+
+
+def _dict_keys_to_low(dictionary):
+    dict_keys_lowercase = dict((key.lower(), value)
+                               for key, value in dictionary.iteritems())
+
+    return dict_keys_lowercase

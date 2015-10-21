@@ -31,7 +31,7 @@ FOOBAR_CATALOG = json.loads("""{
 }
 }""")
 
-HEALTH_CHECK_TAGS = ["devops","hipchat"]
+HEALTH_CHECK_TAGS = ["devops", "hipchat"]
 
 CURRENT_STATE = json.loads("""[
 {
@@ -169,21 +169,21 @@ class WatchCheckHandlerTests(unittest.TestCase):
 
     def test_CreateConsulHealthNodeList(self):
         current_obj_list = utilities.createConsulHealthList(CURRENT_STATE)
-        self.assertEqual(current_obj_list[0],ConsulHealthStruct.ConsulHealthStruct(**CURRENT_STATE[0]))
-
+        self.assertEqual(current_obj_list[
+                         0], ConsulHealthStruct.ConsulHealthStruct(**CURRENT_STATE[0]))
 
     def test_GetObjectListByStateWarning(self):
         current_obj_list = utilities.createConsulHealthList(CURRENT_STATE)
         current_state_warning = utilities.getObjectListByState(
-                    current_obj_list, settings.WARNING_STATE)
-        self.assertEqual(0,len(current_state_warning))
+            current_obj_list, settings.WARNING_STATE)
+        self.assertEqual(0, len(current_state_warning))
 
     def test_GetObjectListByStatePassing(self):
         current_obj_list = utilities.createConsulHealthList(CURRENT_STATE)
         current_state_warning = utilities.getObjectListByState(
-                    current_obj_list, settings.PASSING_STATE)
+            current_obj_list, settings.PASSING_STATE)
         print current_state_warning
-        self.assertEqual(2,len(current_state_warning))
+        self.assertEqual(2, len(current_state_warning))
 
     def test_FromPassingToPassing(self):
         self.watch.health_current = CURRENT_STATE_PASSING
@@ -192,8 +192,8 @@ class WatchCheckHandlerTests(unittest.TestCase):
         curr = utilities.createConsulHealthList(self.watch.health_current)
         prior = utilities.createConsulHealthList(self.watch.health_prior)
 
-        alert_list = self.watch.checkForAlertChanges(curr,prior)
-        self.assertEqual(alert_list,None)
+        alert_list = self.watch.checkForAlertChanges(curr, prior)
+        self.assertEqual(alert_list, None)
 
     def test_FromPassingToWarning(self):
         self.watch.health_current = CURRENT_STATE_WARNING
@@ -202,8 +202,8 @@ class WatchCheckHandlerTests(unittest.TestCase):
         curr = utilities.createConsulHealthList(self.watch.health_current)
         prior = utilities.createConsulHealthList(self.watch.health_prior)
 
-        alert_list = self.watch.checkForAlertChanges(curr,prior)
-        self.assertEqual(1,len(alert_list))
+        alert_list = self.watch.checkForAlertChanges(curr, prior)
+        self.assertEqual(1, len(alert_list))
 
     def test_FromPassingToCritical(self):
         self.watch.health_current = CURRENT_STATE_CRITICAL
@@ -212,8 +212,8 @@ class WatchCheckHandlerTests(unittest.TestCase):
         curr = utilities.createConsulHealthList(self.watch.health_current)
         prior = utilities.createConsulHealthList(self.watch.health_prior)
 
-        alert_list = self.watch.checkForAlertChanges(curr,prior)
-        self.assertEqual(1,len(alert_list))
+        alert_list = self.watch.checkForAlertChanges(curr, prior)
+        self.assertEqual(1, len(alert_list))
 
     def test_FromCriticalToCritical(self):
         self.watch.health_current = CURRENT_STATE_CRITICAL
@@ -222,8 +222,8 @@ class WatchCheckHandlerTests(unittest.TestCase):
         curr = utilities.createConsulHealthList(self.watch.health_current)
         prior = utilities.createConsulHealthList(self.watch.health_prior)
 
-        alert_list = self.watch.checkForAlertChanges(curr,prior)
-        self.assertEqual(alert_list,None)
+        alert_list = self.watch.checkForAlertChanges(curr, prior)
+        self.assertEqual(alert_list, None)
 
     def test_FromCriticalToWarning(self):
         self.watch.health_current = CURRENT_STATE_WARNING
@@ -232,8 +232,8 @@ class WatchCheckHandlerTests(unittest.TestCase):
         curr = utilities.createConsulHealthList(self.watch.health_current)
         prior = utilities.createConsulHealthList(self.watch.health_prior)
 
-        alert_list = self.watch.checkForAlertChanges(curr,prior)
-        self.assertEqual(1,len(alert_list))
+        alert_list = self.watch.checkForAlertChanges(curr, prior)
+        self.assertEqual(1, len(alert_list))
 
     def test_FromCriticalToPassing(self):
         self.watch.health_current = CURRENT_STATE_PASSING
@@ -242,8 +242,8 @@ class WatchCheckHandlerTests(unittest.TestCase):
         curr = utilities.createConsulHealthList(self.watch.health_current)
         prior = utilities.createConsulHealthList(self.watch.health_prior)
 
-        alert_list = self.watch.checkForAlertChanges(curr,prior)
-        self.assertEqual(1,len(alert_list))
+        alert_list = self.watch.checkForAlertChanges(curr, prior)
+        self.assertEqual(1, len(alert_list))
 
     def test_FromWarningToWarning(self):
         self.watch.health_current = CURRENT_STATE_WARNING
@@ -252,8 +252,8 @@ class WatchCheckHandlerTests(unittest.TestCase):
         curr = utilities.createConsulHealthList(self.watch.health_current)
         prior = utilities.createConsulHealthList(self.watch.health_prior)
 
-        alert_list = self.watch.checkForAlertChanges(curr,prior)
-        self.assertEqual(alert_list,None)
+        alert_list = self.watch.checkForAlertChanges(curr, prior)
+        self.assertEqual(alert_list, None)
 
     def test_FromWarningToPassing(self):
         self.watch.health_current = CURRENT_STATE_PASSING
@@ -262,8 +262,8 @@ class WatchCheckHandlerTests(unittest.TestCase):
         curr = utilities.createConsulHealthList(self.watch.health_current)
         prior = utilities.createConsulHealthList(self.watch.health_prior)
 
-        alert_list = self.watch.checkForAlertChanges(curr,prior)
-        self.assertEqual(1,len(alert_list))
+        alert_list = self.watch.checkForAlertChanges(curr, prior)
+        self.assertEqual(1, len(alert_list))
 
     def test_FromWarningToCritical(self):
         self.watch.health_current = CURRENT_STATE_CRITICAL
@@ -272,17 +272,12 @@ class WatchCheckHandlerTests(unittest.TestCase):
         curr = utilities.createConsulHealthList(self.watch.health_current)
         prior = utilities.createConsulHealthList(self.watch.health_prior)
 
-        alert_list = self.watch.checkForAlertChanges(curr,prior)
-        self.assertEqual(1,len(alert_list))
-
+        alert_list = self.watch.checkForAlertChanges(curr, prior)
+        self.assertEqual(1, len(alert_list))
 
     def test_filterByBlacklistsExceptions(self):
-        self.assertRaises(TypeError,self.watch.filterByBlacklists)
-
-
-
+        self.assertRaises(TypeError, self.watch.filterByBlacklists)
 
 
 if __name__ == '__main__':
     unittest.main()
-
