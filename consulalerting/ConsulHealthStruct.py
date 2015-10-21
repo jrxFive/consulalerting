@@ -1,8 +1,7 @@
-#!/usr/bin/env python
-from Settings import Settings
+import settings
 
 
-class ConsulHealthStruct(Settings):
+class ConsulHealthStruct(object):
 
     """
     A Python Object representation of Consul /v1/health/node/<node>
@@ -20,16 +19,16 @@ class ConsulHealthStruct(Settings):
 
     def __init__(self, **kwargs):
         """
-        Constructs a :class `ConsulHealthStruct <ConsulHealth> using
+        Constructs a class `ConsulHealthStruct <ConsulHealth> using
         a unpacked dictionary from /v1/health/node/<node>. Will also associate
-        Tags from /v1/catalog/node/<node>
+        Tags from /v1/catalog/node/<node>.
 
-        :param node_catalog, /v1/catalog/node/<node>, dictionary
-        :param non_service_checks, /v1/kv/systemchecks, list,
-        list of tags usually for non service checks
-        :param **kwargs, unpacked dictionary object of /v1/health/node/<node>
+        Arguments:
+            node_catalog: /v1/catalog/node/<node>, dictionary.
+            non_service_checks: /v1/kv/systemchecks, list, of tags for non service checks.
+            **kwargs: unpacked dictionary object of /v1/health/node/<node>.
         """
-        super(ConsulHealthStruct, self).__init__()
+        #super(ConsulHealthStruct, self).__init__()
         self.__dict__.update(kwargs)
 
     def __str__(self):
@@ -46,7 +45,10 @@ class ConsulHealthStruct(Settings):
         Uses key/values from /v1/health/node/<node>,
         Node,CheckID,Name,ServiceID,ServiceName, Status,Notes,Output
         are omitted due to that they will change. The hash is used to
-        determine if a check was ever in a prior state, in WatchCheckHandler.py
+        determine if a check was ever in a prior state, in WatchCheckHandler.py.
+
+        Returns:
+          hash: of ConsuLHealthStruct object.
         """
         return hash((self.Node,
                      self.CheckID,
@@ -72,11 +74,14 @@ class ConsulHealthStruct(Settings):
         associated to an Application, to know who to alert to use the tags
         give from non_service_checks, otherwise do a lookup of the tags
         its associated to based on the catalog dictionary.
-        Ensures all the tags are lowercase
+        Ensures all the tags are lowercase.
 
-        :param node_catalog, /v1/catalog/node/<node>, dictionary
-        :param non_service_checks, /v1/kv/systemchecks, list,
-        list of tags usually for non service checks
+        Arguments:
+          node_catalog: /v1/catalog/node/<node>, dictionary.
+          non_service_checks: /v1/kv/systemchecks, list, of tags for non service checks.
+        Raises:
+          TypeError:
+          AttributeError: 
         """
         if not self.ServiceID and not self.ServiceName:  # Is a system check
             tag_list = non_service_checks
@@ -89,14 +94,14 @@ class ConsulHealthStruct(Settings):
             else:
                 self.Tags = []
         except TypeError:
-            ConsulHealthStruct.logger.error(
+            settings.logger.error(
                 "Message=non_service_checks is not an iterable Type={type},"
                 "Value={value}".format(
                     type=type(non_service_checks),
                     value=non_service_checks))
             raise
         except AttributeError:
-            ConsulHealthStruct.logger.error(
+            settings.logger.error(
                 "Message=value within non_service_checks is not a string Type={type},"
                 "Value={value}".format(
                     type=type(non_service_checks),

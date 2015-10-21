@@ -1,6 +1,7 @@
 import consulate
 import json
 import sys
+import consulalerting.settings as settings
 
 blacklist_nodes = []
 blacklist_services = []
@@ -34,33 +35,29 @@ notify_email= {"mail_domain_address":"",
 
 notify_pagerduty= {"teams":{}}
 
-if sys.version_info >= (2, 6, 0):
-    consulate_session = consulate.Consul(host="0.0.0.0")
-else:
-    consulate_session = consulate.Consulate(host="0.0.0.0")
 
 try:
-    consulate_session.kv["alerting/healthchecktags"] = json.dumps(health_check_tags)
+    settings.consul.kv[settings.KV_ALERTING_HEALTH_CHECK_TAGS] = json.dumps(health_check_tags)
 
-    consulate_session.kv["alerting/blacklist/nodes"] = json.dumps(blacklist_nodes)
+    settings.consul.kv[settings.KV_ALERTING_BLACKLIST_NODES] = json.dumps(blacklist_nodes)
 
-    consulate_session.kv["alerting/blacklist/services"] = json.dumps(blacklist_services)
+    settings.consul.kv[settings.KV_ALERTING_BLACKLIST_SERVICES] = json.dumps(blacklist_services)
 
-    consulate_session.kv["alerting/blacklist/checks"] = json.dumps(blacklist_checks)
+    settings.consul.kv[settings.KV_ALERTING_BLACKLIST_CHECKS] = json.dumps(blacklist_checks)
 
-    consulate_session.kv["alerting/notify/plugins"] = json.dumps(notify_plugins)
+    settings.consul.kv[settings.KV_ALERTING_AVAILABLE_PLUGINS] = json.dumps(notify_plugins)
 
-    consulate_session.kv["alerting/notify/hipchat"] = json.dumps(notify_hipchat)
+    settings.consul.kv[settings.KV_ALERTING_NOTIFY_HIPCHAT] = json.dumps(notify_hipchat)
 
-    consulate_session.kv["alerting/notify/slack"] = json.dumps(notify_slack)
+    settings.consul.kv[settings.KV_ALERTING_NOTIFY_SLACK] = json.dumps(notify_slack)
 
-    consulate_session.kv["alerting/notify/mailgun"] = json.dumps(notify_mailgun)
+    settings.consul.kv[settings.KV_ALERTING_NOTIFY_MAILGUN] = json.dumps(notify_mailgun)
 
-    consulate_session.kv["alerting/notify/email"] = json.dumps(notify_email)
+    settings.consul.kv[settings.KV_ALERTING_NOTIFY_EMAIL] = json.dumps(notify_email)
 
-    consulate_session.kv["alerting/notify/pagerduty"] = json.dumps(notify_pagerduty)
+    settings.consul.kv[settings.KV_ALERTING_NOTIFY_PAGERDUTY] = json.dumps(notify_pagerduty)
 
-    consulate_session.kv["alerting/prior"] = []
+    settings.consul.kv[settings.KV_PRIOR_STATE] = []
 except TypeError:
     print "One of the python data structures is not JSON serializable, may have accidentally created a set()"
     raise

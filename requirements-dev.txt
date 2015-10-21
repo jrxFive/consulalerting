@@ -1,0 +1,6 @@
+requests
+tornado
+consulate==0.6.0
+nose
+coverage
+responses
