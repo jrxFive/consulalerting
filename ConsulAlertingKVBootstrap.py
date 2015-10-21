@@ -1,7 +1,7 @@
 import consulate
 import json
 import sys
-import settings
+import consulalerting.settings as settings
 
 blacklist_nodes = []
 blacklist_services = []
@@ -43,7 +43,7 @@ try:
 
     settings.consul.kv[settings.KV_ALERTING_BLACKLIST_SERVICES] = json.dumps(blacklist_services)
 
-    settings.consul.kv[settings,KV_ALERTING_BLACKLIST_CHECKS] = json.dumps(blacklist_checks)
+    settings.consul.kv[settings.KV_ALERTING_BLACKLIST_CHECKS] = json.dumps(blacklist_checks)
 
     settings.consul.kv[settings.KV_ALERTING_AVAILABLE_PLUGINS] = json.dumps(notify_plugins)
 
