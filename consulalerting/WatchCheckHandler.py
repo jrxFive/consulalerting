@@ -236,8 +236,8 @@ class WatchCheckHandler(object):
 
         self.health_prior = utilities.priorState(settings.KV_PRIOR_STATE)
 
-        self.health_check_tags = utilities.getCheckTags(self.conul,
-                                                        settings.KV_ALERTING_HEALTH_CHECK_TAGS)
+        self.health_check_tags = utilities.getCheckTags(
+            settings.KV_ALERTING_HEALTH_CHECK_TAGS)
 
         settings.logger.info("Message=Obtaining blacklists")
 
