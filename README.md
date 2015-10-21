@@ -1,10 +1,18 @@
 [![Build Status](https://travis-ci.org/jrxFive/consulalerting.svg?branch=dev)](https://travis-ci.org/jrxFive/consulalerting)
 
-Consul Alerting
+#Consul Alerting
 A set of python files for Consul for checks, watches, and notifications. By using tags for services and checks,
 consulalerting will notify the corresponding groups by whichever plugins are also in the tags list. For example
-the redis service has plugins enabled for "hipchat" and will route notifications via hipchat to "devops" and "techops".
+the redis service has plugins enabled for "hipchat" and will route notifications via hipchat to "devops" and "dev".
 These routes are defined in the Consul KV under alerting/notify/, and can be setup using ConsulAlertingKVBoostrap.py, Consul KV, or programatically.
+
+
+#High Availability
+Consulalerting is not a separate daemon, each time a watch is trigger Consul itself will trigger the WatchCheckHandler. To ensure notifications are
+received even if the local instance of the consul server is down, other instances will still notify. This is done by using Consul's session locking
+feature. By installing consulalerting on each Consul server and register the watch, the first consulalerting instance to acquire a lock for the
+current catalog md5sum hash will process the corresponding notifications. As long as Consul servers itself are not in a failed state consulalerting
+will continue to notify.
 
 
 # Using Tags to notify
@@ -15,10 +23,10 @@ These routes are defined in the Consul KV under alerting/notify/, and can be set
     "name": "redis",
     "tags": ["devops","master","hipchat","dev"],
     "port": 8000,
-    "check": {
+    "checks": [{
       "script": "/usr/local/bin/check_redis.py",
       "interval": "10s"
-    }
+    }]
   }
 }
 ```
@@ -87,7 +95,8 @@ notify_pagerduty = {"teams":{
 | health_check_tags | List | Tags to be used to determine who to alert to and what type of alerts for non-application checks |
 
 
-
+## Wildcard Blacklist
+If you wish to disable all notification for a certain blacklist type simply use ["*"] as the blacklist array value.
 
 
 After the script is run, you can always change these within the Consul UI
