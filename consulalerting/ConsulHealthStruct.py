@@ -1,8 +1,7 @@
-#!/usr/bin/env python
-from Settings import Settings
+import settings
 
 
-class ConsulHealthStruct(Settings):
+class ConsulHealthStruct(object):
 
     """
     A Python Object representation of Consul /v1/health/node/<node>
@@ -29,7 +28,7 @@ class ConsulHealthStruct(Settings):
         list of tags usually for non service checks
         :param **kwargs, unpacked dictionary object of /v1/health/node/<node>
         """
-        super(ConsulHealthStruct, self).__init__()
+        #super(ConsulHealthStruct, self).__init__()
         self.__dict__.update(kwargs)
 
     def __str__(self):
@@ -89,14 +88,14 @@ class ConsulHealthStruct(Settings):
             else:
                 self.Tags = []
         except TypeError:
-            ConsulHealthStruct.logger.error(
+            settings.logger.error(
                 "Message=non_service_checks is not an iterable Type={type},"
                 "Value={value}".format(
                     type=type(non_service_checks),
                     value=non_service_checks))
             raise
         except AttributeError:
-            ConsulHealthStruct.logger.error(
+            settings.logger.error(
                 "Message=value within non_service_checks is not a string Type={type},"
                 "Value={value}".format(
                     type=type(non_service_checks),

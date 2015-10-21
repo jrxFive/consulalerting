@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import unittest
 import json as json
+import consulalerting.settings as settings
 from consulalerting import NotificationEngine
 from consulalerting import ConsulHealthStruct
 
@@ -57,7 +58,7 @@ class NotificationEngineTests(unittest.TestCase):
 
 
     def setUp(self):
-        self.ne = NotificationEngine.NotificationEngine(CONSUL_HEALTH_STRUCT_ALERT_LIST)
+        self.ne = NotificationEngine.NotificationEngine(CONSUL_HEALTH_STRUCT_ALERT_LIST,settings.consul)
         self.ne.available_plugins = KV_ALERTING_AVAILABLE_PLUGINS
         self.ne.unique_tags = set(["hipchat","mailgun"])
 
@@ -67,12 +68,12 @@ class NotificationEngineTests(unittest.TestCase):
         self.assertEqual(len(unique_tags),len(set(["devops","consul","mailgun","hipchat","redis","techops","dev","slack","qa","redis-slave"])))
 
 
-    # def test_loadPluginsFromTags(self):
-    #     hipchat,slack,mailgun,email = self.ne.load_plugins_from_tags()
-    #     self.assertFalse(email)
-    #     self.assertTrue(hipchat)
-    #     self.assertFalse(slack)
-    #     self.assertTrue(mailgun)
+    def test_loadPluginsFromTags(self):
+        hipchat,slack,mailgun,email,pagerduty = self.ne.load_plugins_from_tags()
+        self.assertFalse(email)
+        self.assertTrue(hipchat)
+        self.assertFalse(slack)
+        self.assertTrue(mailgun)
 
     def test_commonNotifiers(self):
         common = self.ne.common_notifiers(CONSUL_HEALTH_STRUCT_ALERT_LIST[0],"teams",MAILGUN_NOTIFIER)
