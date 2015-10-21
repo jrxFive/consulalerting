@@ -1,5 +1,7 @@
 import requests
 import settings
+import smtplib
+import string
 import json as json
 
 def notify_hipchat(obj, message_template, common_notifiers, consul_hipchat):

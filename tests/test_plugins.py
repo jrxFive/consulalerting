@@ -63,6 +63,25 @@ class PluginsTests(unittest.TestCase):
         self.assertEqual(200, status_code)
 
     @responses.activate
+    def test_notifySlackHipchat(self):
+        responses.add(
+            responses.POST, "https://slack.com/api/chat.postMessage", json=True, status=200)
+        responses.add(
+            responses.POST, "https://api.hipchat.com/v1/", json=True, status=200)
+
+        status_code = plugins.notify_slack(
+            self.message_template, ["devops"], CONSUL_SLACK)
+
+        self.assertEqual(200, status_code)
+
+        status_code = 0
+
+        status_code = plugins.notify_hipchat(
+            self.obj, self.message_template, ["devops"], CONSUL_HIPCHAT)
+
+        self.assertEqual(200, status_code)
+
+    @responses.activate
     def test_notifyPagerduty(self):
         responses.add(
             responses.POST, "https://events.pagerduty.com/generic/2010-04-15/create_event.json", json=True, status=200)
