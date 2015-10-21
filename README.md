@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/jrxFive/consulalerting.svg?branch=dev)](https://travis-ci.org/jrxFive/consulalerting)
+[![Build Status](https://travis-ci.org/jrxFive/consulalerting.svg?branch=master)](https://travis-ci.org/jrxFive/consulalerting)
 
 #Consul Alerting
 A set of python files for Consul for checks, watches, and notifications. By using tags for services and checks,
@@ -8,9 +8,9 @@ These routes are defined in the Consul KV under alerting/notify/, and can be set
 
 
 #High Availability
-Consulalerting is not a separate daemon, each time a watch is trigger Consul itself will trigger the WatchCheckHandler. To ensure notifications are
+Consulalerting is not a separate daemon, each time a watch is triggered Consul itself will trigger the WatchCheckHandler. To ensure notifications are
 received even if the local instance of the consul server is down, other instances will still notify. This is done by using Consul's session locking
-feature. By installing consulalerting on each Consul server and register the watch, the first consulalerting instance to acquire a lock for the
+feature. By installing consulalerting on each Consul server and registering the watch, the first consulalerting instance to acquire a lock for the
 current catalog md5sum hash will process the corresponding notifications. As long as Consul servers itself are not in a failed state consulalerting
 will continue to notify.
 

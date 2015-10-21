@@ -35,7 +35,10 @@ class NotificationEngine(object):
 
     def __init__(self, alert_list, consulate_session):
         """consul_watch_handler_checks, will send a list of ConsulHealthNodeStruct
-        :param list alert_list: of ConsulHealthNodeStruct Object
+
+        Arguments:
+          alert_list: List of ConsulHealthNodeStruct Object
+          consulate_session: Consulate object
         """
         self.alert_list = alert_list
         self.consul = consulate_session

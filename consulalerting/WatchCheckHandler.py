@@ -22,6 +22,8 @@ class WatchCheckHandler(object):
 
     def __init__(self, consulate_session):
         """
+        Arguments:
+          consulate_session: Consulate session object
         """
         self.consul = consulate_session
 
