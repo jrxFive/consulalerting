@@ -226,14 +226,6 @@ class WatchCheckHandler(object):
         lock_result = utilities.acquireLock("{k}/{h}".format(k=settings.KV_ALERTING_HASHES,
                                                              h=currMD5Hash), session_id)
 
-        if not lock_result:
-            settings.logger.info("Message=Other consul alerting instance"
-                                 "Processing alert and notifcation")
-            return []
-
-        self.consul.kv[settings.KV_PRIOR_STATE] = json.dumps(
-            self.health_current)
-
         self.health_prior = utilities.priorState(settings.KV_PRIOR_STATE)
 
         self.health_check_tags = utilities.getCheckTags(
@@ -268,6 +260,14 @@ class WatchCheckHandler(object):
         health_current_object_list_filtered = self.filterByBlacklists(
             health_current_object_list)
 
+        if not lock_result:
+            settings.logger.info("Message=Other consul alerting instance"
+                                 "Processing alert and notifcation")
+            return []
+
+        self.consul.kv[settings.KV_PRIOR_STATE] = json.dumps(
+            self.health_current)
+
         settings.logger.info("Message=Creating alert list")
 
         alert_list = self.checkForAlertChanges(
@@ -281,11 +281,13 @@ class WatchCheckHandler(object):
             settings.logger.info(
                 "Message=Obtaining Tags for new alerts")
 
-            alert_list = self.nodeCatalogTags(alert_list)
+            self.nodeCatalogTags(alert_list)
 
-        settings.logger.info("Message=Returning list of alerts")
+            return alert_list
+        else:
+            settings.logger.info("Message=List of alerts empty")
 
-        return alert_list
+            return alert_list
 
 
 if __name__ == "__main__":
