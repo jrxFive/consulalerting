@@ -118,7 +118,7 @@ class WatchCheckHandler(object):
 
             except Exception:
                 settings.logger.error("Message=Failed to create alert list with "
-                                               "no prior catalog")
+                                      "no prior catalog")
                 raise
 
         else:
@@ -212,14 +212,12 @@ class WatchCheckHandler(object):
         currMD5Hash = utilities.getHash(self.health_current)
         session_id = utilities.createSession(self.consul)
 
-        lock_result = utilities.acquireLock(self.consul,
-                                            "alerting/hashes/{h}".format(
-                                                h=currMD5Hash),
-                                            session_id)
+        lock_result = utilities.acquireLock(self.consul, "{k}/{h}".format(k=settings.KV_ALERTING_HASHES,
+                                                                          h=currMD5Hash), session_id)
 
         if not lock_result:
             settings.logger.info("Message=Other consul alerting instance"
-                                          "Processing alert and notifcation")
+                                 "Processing alert and notifcation")
             sys.exit(0)
 
         self.consul.kv[settings.KV_PRIOR_STATE] = json.dumps(
@@ -243,7 +241,7 @@ class WatchCheckHandler(object):
                                                       settings.KV_ALERTING_BLACKLIST_CHECKS)
 
         settings.logger.info("Message=Creating current and prior health "
-                                      "ConsulHealthStruct lists")
+                             "ConsulHealthStruct lists")
 
         health_prior_object_list = utilities.createConsulHealthList(
             self.health_prior)
@@ -285,5 +283,5 @@ if __name__ == "__main__":
     alert_list = w.Run()
 
     if alert_list:
-        n = NotificationEngine(alert_list,settings.consul)
+        n = NotificationEngine(alert_list, settings.consul)
         n.Run()
