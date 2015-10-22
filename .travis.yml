@@ -6,10 +6,12 @@ before_install:
     - curl -L -o /tmp/0.5.2_linux_amd64.zip https://dl.bintray.com/mitchellh/consul/0.5.2_linux_amd64.zip
     - unzip /tmp/0.5.2_linux_amd64.zip
     - ./consul agent -server -bootstrap-expect 1 -data-dir /tmp/consul &
-    - pip install codecov
+    - pip install python-coveralls
 # command to install dependencies
 install: "pip install -r requirements-dev.txt"
 # command to run tests
 script: 
   - python ConsulAlertingKVBootstrap.py
-  - nosetests
+  - nosetests --with-coverage --cover-package consulalerting
+after_success:  
+  - coveralls

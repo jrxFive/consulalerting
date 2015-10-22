@@ -223,10 +223,10 @@ class WatchCheckHandler(object):
         self.health_current = utilities.currentState()
 
         currMD5Hash = utilities.getHash(self.health_current)
-        session_id = utilities.createSession()
+        self.session_id = utilities.createSession()
 
         lock_result = utilities.acquireLock("{k}/{h}".format(k=settings.KV_ALERTING_HASHES,
-                                                             h=currMD5Hash), session_id)
+                                                             h=currMD5Hash), self.session_id)
 
         self.health_prior = utilities.priorState(settings.KV_PRIOR_STATE)
 

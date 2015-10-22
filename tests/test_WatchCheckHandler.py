@@ -278,6 +278,14 @@ class WatchCheckHandlerTests(unittest.TestCase):
     def test_filterByBlacklistsExceptions(self):
         self.assertRaises(TypeError, self.watch.filterByBlacklists)
 
+    #Integration Test
+    def test_Run(self):
+        w = WatchCheckHandler.WatchCheckHandler(settings.consul)
+        alert_list = w.Run()
+        settings.consul.session.destroy(w.session_id)
+
+        self.assertEqual(alert_list, None)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -10,7 +10,8 @@ These routes are defined in the Consul KV under alerting/notify/, and can be set
 #High Availability
 Consulalerting is not a separate daemon, each time a watch is triggered Consul itself will trigger the WatchCheckHandler. To ensure notifications are
 received even if the local instance of the consul server is down, other instances will still notify. This is done by using Consul's session locking
-feature. By installing consulalerting on each Consul server and registering the watch, the first consulalerting instance to acquire a lock for the
+feature with a TTL so in case consulalerting fails that specific hash of the catalog will continue to get reported on in the future.
+By installing consulalerting on each Consul server and registering the watch, the first consulalerting instance to acquire a lock for the
 current catalog md5sum hash will process the corresponding notifications. As long as Consul servers itself are not in a failed state consulalerting
 will continue to notify.
 
@@ -166,3 +167,4 @@ After the script is run, you can always change these within the Consul UI
 * Improve KVBootstrap.py
 * Integration tests
 * Improve code coverage
+* Use STDIN of catalog instead of lookup
