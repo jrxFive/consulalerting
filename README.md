@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/jrxFive/consulalerting.svg?branch=master)](https://travis-ci.org/jrxFive/consulalerting)
+[![Coverage Status](https://coveralls.io/repos/jrxFive/consulalerting/badge.svg?branch=master&service=github)](https://coveralls.io/github/jrxFive/consulalerting?branch=master)
 
 #Consul Alerting
 A set of python files for Consul for checks, watches, and notifications. By using tags for services and checks,
