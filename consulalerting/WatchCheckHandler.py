@@ -220,13 +220,29 @@ class WatchCheckHandler(object):
         """
         settings.logger.info("Message=Performing consul api lookups")
 
-        self.health_current = utilities.currentState()
+        try:
+            if not sys.stdin.isatty():
+                settings.logger.info("Message=STDIN is given")
+                self.health_current = json.loads(sys.__stdin__.read())
+                settings.logger.info("Message=STDIN is valid JSON")
+            else:
+                settings.logger.info("Message=STDIN not given")
+                raise ValueError
+        except ValueError:
+            settings.logger.info("Message=STDIN is invalid JSON using Consul lookup")
+            self.health_current = utilities.currentState()
 
         currMD5Hash = utilities.getHash(self.health_current)
         self.session_id = utilities.createSession()
 
         lock_result = utilities.acquireLock("{k}/{h}".format(k=settings.KV_ALERTING_HASHES,
                                                              h=currMD5Hash), self.session_id)
+
+
+        if not lock_result:
+            settings.logger.info("Message=Other consul alerting instance"
+                                 "Processing alert and notifcation")
+            return []
 
         self.health_prior = utilities.priorState(settings.KV_PRIOR_STATE)
 
@@ -262,10 +278,6 @@ class WatchCheckHandler(object):
         health_current_object_list_filtered = self.filterByBlacklists(
             health_current_object_list)
 
-        if not lock_result:
-            settings.logger.info("Message=Other consul alerting instance"
-                                 "Processing alert and notifcation")
-            return []
 
         self.consul.kv[settings.KV_PRIOR_STATE] = json.dumps(
             self.health_current)
