@@ -2,6 +2,8 @@
 [![Coverage Status](https://coveralls.io/repos/jrxFive/consulalerting/badge.svg?branch=master&service=github)](https://coveralls.io/github/jrxFive/consulalerting?branch=master)
 
 #Consul Alerting
+
+[![Join the chat at https://gitter.im/jrxFive/consulalerting](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/jrxFive/consulalerting?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 A set of python files for Consul for checks, watches, and notifications. By using tags for services and checks,
 consulalerting will notify the corresponding groups by whichever plugins are also in the tags list. For example
 the redis service has plugins enabled for "hipchat" and will route notifications via hipchat to "devops" and "dev".
