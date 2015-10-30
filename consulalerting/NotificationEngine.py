@@ -143,7 +143,7 @@ class NotificationEngine(object):
             common_notifiers = utilities.common_notifiers(
                 obj, "rooms", self.hipchat)
             hipchat = self.hipchat
-            Process(target=plugins.notify_hipchat, args=(obj, message_template,
+            _ = Process(target=plugins.notify_hipchat, args=(obj, message_template,
                                                          common_notifiers,
                                                          hipchat)).start()
 
@@ -182,7 +182,7 @@ class NotificationEngine(object):
 
         if "influxdb" in obj.Tags and self.influxdb:
             influxdb = self.influxdb
-            Process(target=plugins.notify_influxdb, args=(obj, message_template,
+            _ = Process(target=plugins.notify_influxdb, args=(obj, message_template,
                                                          influxdb)).start()
 
     def Run(self):
