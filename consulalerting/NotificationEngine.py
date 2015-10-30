@@ -106,8 +106,12 @@ class NotificationEngine(object):
             self.pagerduty = utilities.load_plugin(
                 settings.KV_ALERTING_NOTIFY_PAGERDUTY, "teams")
 
+        if "influxdb" in configurations_files_to_load:
+            self.influxdb = utilities.load_plugin(
+                settings.KV_ALERTING_NOTIFY_INFLUXDB, "database")
+
         return (self.hipchat, self.slack, self.mailgun,
-                self.email, self.pagerduty)
+                self.email, self.pagerduty, self.influxdb)
 
     def message_pattern(self, obj):
 
@@ -175,6 +179,11 @@ class NotificationEngine(object):
                                                            message_template,
                                                            common_notifiers,
                                                            pagerduty)).start()
+
+        if "influxdb" in obj.Tags and self.influxdb:
+            influxdb = self.influxdb
+            Process(target=plugins.notify_influxdb, args=(obj, message_template,
+                                                         influxdb)).start()
 
     def Run(self):
         self.get_available_plugins()

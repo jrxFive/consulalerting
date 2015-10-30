@@ -203,3 +203,35 @@ def notify_pagerduty(
                 "Status_Code={status}".format(message=message_template,
                                               status=response.status_code))
             return response.status_code
+
+
+def notify_influxdb(obj, message_template, consul_influxdb):
+    # message_template = "test value={msg}".format(msg=message_template)
+    message_template = "test value=1"
+    response = requests.post(
+        consul_influxdb["url"],
+        params={'db': consul_influxdb["database"]},
+        data=message_template)
+
+    if response.status_code == 200:
+        settings.logger.info(
+            "NotifyPlugin=InfluxDB Server={url} "
+            "Database={database} Message={message} "
+            "Status_Code={status}".format(
+                url=consul_influxdb["url"],
+                database=consul_influxdb["database"],
+                message=message_template,
+                status=response.status_code))
+
+        return response.status_code
+    else:
+        settings.logger.error(
+            "NotifyPlugin=InfluxDB Server={url} "
+            "Database={database} Message={message} "
+            "Status_Code={status}".format(
+                url=consul_influxdb["url"],
+                database=consul_influxdb["database"],
+                message=message_template,
+                status=response.status_code))
+
+        return response.status_code
