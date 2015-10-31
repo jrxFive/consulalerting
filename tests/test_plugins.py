@@ -8,12 +8,12 @@ import consulalerting.ConsulHealthStruct as ConsulHealthStruct
 
 
 ALL_REQUESTS_ALERTING_AVAILABLE_PLUGINS = [
-    "hipchat", "slack", "mailgun", "pagerduty"]
+    "hipchat", "slack", "mailgun", "pagerduty", "influxdb"]
 
 ALL_REQUESTS_PLUGINS_ALERT_LIST = [{"Node": "consul",
                                     "CheckID": "service:redis",
                                     "Name": "Service 'redis' check",
-                                    "Tags": ["hipchat", "slack", "mailgun", "pagerduty", "devops"],
+                                    "Tags": ["hipchat", "slack", "mailgun", "pagerduty", "influxdb", "devops"],
                                     "ServiceName": "redis",
                                     "Notes": "",
                                     "Status": "critical",
@@ -38,6 +38,8 @@ CONSUL_MAILGUN = {"api_token": "testing123testing123",
                   }
 
 CONSUL_PAGERDUTY = {"teams": {"devops": ""}}
+
+CONSUL_INFLUXDB = {"url":"http://localhost:8086/write", "databases":{"db":"mydb"}}
 
 
 class PluginsTests(unittest.TestCase):
@@ -112,6 +114,16 @@ class PluginsTests(unittest.TestCase):
         self.assertEqual(200, status_code)
 
     @responses.activate
+    def test_notifyInfluxdb(self):
+        responses.add(
+            responses.POST, "http://localhost:8086/write", json=True, status=204)
+
+        status_code = plugins.notify_influxdb(
+            self.obj, self.message_template, ["db"], CONSUL_INFLUXDB)
+
+        self.assertEqual(204, status_code)
+
+    @responses.activate
     def test_notifySlackFail(self):
         responses.add(
             responses.POST, "https://slack.com/api/chat.postMessage", json=True, status=400)
@@ -150,3 +162,13 @@ class PluginsTests(unittest.TestCase):
             self.obj, self.message_template, ["devops"], CONSUL_HIPCHAT)
 
         self.assertNotEqual(200, status_code)
+
+    @responses.activate
+    def test_notifyInfluxdbFail(self):
+        responses.add(
+            responses.POST, "http://localhost:8086/write", json=True, status=400)
+
+        status_code = plugins.notify_influxdb(
+            self.obj, self.message_template, ["db"], CONSUL_INFLUXDB)
+
+        self.assertNotEqual(204, status_code)
