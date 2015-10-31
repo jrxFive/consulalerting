@@ -108,7 +108,7 @@ class NotificationEngine(object):
 
         if "influxdb" in configurations_files_to_load:
             self.influxdb = utilities.load_plugin(
-                settings.KV_ALERTING_NOTIFY_INFLUXDB, "database")
+                settings.KV_ALERTING_NOTIFY_INFLUXDB, "databases")
 
         return (self.hipchat, self.slack, self.mailgun,
                 self.email, self.pagerduty, self.influxdb)
@@ -181,8 +181,11 @@ class NotificationEngine(object):
                                                            pagerduty)).start()
 
         if "influxdb" in obj.Tags and self.influxdb:
+            common_notifiers = utilities.common_notifiers(
+                obj, "databases", self.influxdb)
             influxdb = self.influxdb
             _ = Process(target=plugins.notify_influxdb, args=(obj, message_template,
+                                                         common_notifiers,
                                                          influxdb)).start()
 
     def Run(self):
