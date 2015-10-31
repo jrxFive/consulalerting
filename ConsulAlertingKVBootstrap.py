@@ -36,6 +36,7 @@ notify_email= {"mail_domain_address":"",
 notify_pagerduty= {"teams":{}}
 
 notify_influxdb= {"url":"",
+                  "series":"",
                   "databases":{}}
 
 

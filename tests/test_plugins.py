@@ -39,7 +39,7 @@ CONSUL_MAILGUN = {"api_token": "testing123testing123",
 
 CONSUL_PAGERDUTY = {"teams": {"devops": ""}}
 
-CONSUL_INFLUXDB = {"url":"http://localhost:8086/write", "databases":{"db":"mydb"}}
+CONSUL_INFLUXDB = {"url":"http://localhost:8086/write", "series":"test", "databases":{"db":"mydb"}}
 
 
 class PluginsTests(unittest.TestCase):

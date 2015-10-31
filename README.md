@@ -88,6 +88,7 @@ notify_pagerduty = {"teams":{
 }
 
 notify_influxdb= {"url":"http://localhost:8086/write",
+                  "series":"test",
                   "databases":{"db":"mydb"}
                  }
 
@@ -167,6 +168,7 @@ After the script is run, you can always change these within the Consul UI
 | Keyname | Type | Description |
 | ------- | ---- | ----------- |
 | url | string | URL address of API access for the database |
+| series | string | Name of the database series that will contain the data |
 | databases | dict | Create dictionaries within 'databases' for tags corresponding to influxdb databases |
 
 # TODO
