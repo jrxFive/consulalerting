@@ -208,8 +208,14 @@ def notify_pagerduty(
 def notify_influxdb(obj, message_template, common_notifiers, consul_influxdb):
     for database in common_notifiers:
 
-        message_template = '{series} value="{msg}"'.format(
+        tags = 'ServiceID={ServiceID},CheckID={CheckID},Status={Status}'.format(
+            ServiceID=obj.ServiceID,
+            CheckID=obj.CheckID,
+            Status=obj.Status)
+
+        message_template = '{series},{tags} value="{msg}"'.format(
             series=consul_influxdb["series"],
+            tags=tags,
             msg=message_template)
 
         response = requests.post(
