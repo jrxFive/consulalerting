@@ -11,7 +11,7 @@ blacklist_checks = []
 health_check_tags = []
 
 
-notify_plugins = ["hipchat","slack","mailgun","email","pagerduty"]
+notify_plugins = ["hipchat","slack","mailgun","email","pagerduty","influxdb"]
 
 notify_hipchat= {"api_token":"",
                  "url":"",
@@ -35,6 +35,10 @@ notify_email= {"mail_domain_address":"",
 
 notify_pagerduty= {"teams":{}}
 
+notify_influxdb= {"url":"",
+                  "series":"",
+                  "databases":{}}
+
 
 try:
     settings.consul.kv[settings.KV_ALERTING_HEALTH_CHECK_TAGS] = json.dumps(health_check_tags)
@@ -56,6 +60,8 @@ try:
     settings.consul.kv[settings.KV_ALERTING_NOTIFY_EMAIL] = json.dumps(notify_email)
 
     settings.consul.kv[settings.KV_ALERTING_NOTIFY_PAGERDUTY] = json.dumps(notify_pagerduty)
+
+    settings.consul.kv[settings.KV_ALERTING_NOTIFY_INFLUXDB] = json.dumps(notify_influxdb)
 
     settings.consul.kv[settings.KV_PRIOR_STATE] = []
 except TypeError:

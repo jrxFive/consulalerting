@@ -89,6 +89,11 @@ notify_pagerduty = {"teams":{
                    }
 }
 
+notify_influxdb= {"url":"http://localhost:8086/write",
+                  "series":"test",
+                  "databases":{"db":"mydb"}
+                 }
+
 ```
 
 | Variable Name | Type | Description |
@@ -160,12 +165,20 @@ After the script is run, you can always change these within the Consul UI
 | ------- | ---- | ----------- |
 | teams | dict | Create dictionaries within 'teams' for tags corresponding to pagerduty teams, value is service_key |
 
+### InfluxDB 0.9
+
+| Keyname | Type | Description |
+| ------- | ---- | ----------- |
+| url | string | URL address of API access for the database |
+| series | string | Name of the database series that will contain the data |
+| databases | dict | Create dictionaries within 'databases' for tags corresponding to influxdb databases |
+
 # TODO
 * ~~HA, install per leader, using locks and md5sums of state~~
 * ~~Plugin Separation~~
 * ~~Settings as an import instead of inherited~~
 * Cleanup method documentation
-* Influxdb 0.8/0.9 and logstash protocol plugins
+* Influxdb 0.8/~~0.9~~ and logstash protocol plugins
 * ~~Wildcard blacklist~~
 * Improve KVBootstrap.py
 * Integration tests

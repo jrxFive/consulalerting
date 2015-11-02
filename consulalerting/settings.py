@@ -15,6 +15,7 @@ KV_ALERTING_NOTIFY_SLACK = "alerting/notify/slack"
 KV_ALERTING_NOTIFY_MAILGUN = "alerting/notify/mailgun"
 KV_ALERTING_NOTIFY_EMAIL = "alerting/notify/email"
 KV_ALERTING_NOTIFY_PAGERDUTY = "alerting/notify/pagerduty"
+KV_ALERTING_NOTIFY_INFLUXDB = "alerting/notify/influxdb"
 
 KV_PRIOR_STATE = "alerting/prior"
 KV_ALERTING_HASHES = "alerting/hashes"

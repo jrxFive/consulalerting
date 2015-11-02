@@ -203,3 +203,47 @@ def notify_pagerduty(
                 "Status_Code={status}".format(message=message_template,
                                               status=response.status_code))
             return response.status_code
+
+
+def notify_influxdb(obj, message_template, common_notifiers, consul_influxdb):
+    for database in common_notifiers:
+
+        message_template = message_template.replace('\n', ' ')
+
+        tags = 'ServiceID={ServiceID},CheckID={CheckID},Status={Status}'.format(
+            ServiceID=obj.ServiceID,
+            CheckID=obj.CheckID,
+            Status=obj.Status)
+
+        message_template = '{series},{tags} value="{msg}"'.format(
+            series=consul_influxdb["series"],
+            tags=tags,
+            msg=message_template)
+
+        response = requests.post(
+            consul_influxdb["url"],
+            params={'db': consul_influxdb["databases"][database]},
+            data=message_template)
+
+        if response.status_code == 200:
+            settings.logger.info(
+                "NotifyPlugin=InfluxDB Server={url} "
+                "Database={database} Message={message} "
+                "Status_Code={status}".format(
+                    url=consul_influxdb["url"],
+                    database=consul_influxdb["databases"][database],
+                    message=message_template,
+                    status=response.status_code))
+
+            return response.status_code
+        else:
+            settings.logger.error(
+                "NotifyPlugin=InfluxDB Server={url} "
+                "Database={database} Message={message} "
+                "Status_Code={status}".format(
+                    url=consul_influxdb["url"],
+                    database=consul_influxdb["databases"][database],
+                    message=message_template,
+                    status=response.status_code))
+
+            return response.status_code
