@@ -11,7 +11,7 @@ blacklist_checks = []
 health_check_tags = []
 
 
-notify_plugins = ["hipchat","slack","mailgun","email","pagerduty"]
+notify_plugins = ["hipchat","slack","mailgun","email","pagerduty","influxdb"]
 
 notify_hipchat= {"api_token":"",
                  "url":"",

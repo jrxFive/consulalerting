@@ -13,7 +13,7 @@ ALL_REQUESTS_ALERTING_AVAILABLE_PLUGINS = [
 ALL_REQUESTS_PLUGINS_ALERT_LIST = [{"Node": "consul",
                                     "CheckID": "service:redis",
                                     "Name": "Service 'redis' check",
-                                    "Tags": ["hipchat", "slack", "mailgun", "pagerduty", "influxdb", "devops"],
+                                    "Tags": ["hipchat", "slack", "mailgun", "pagerduty", "influxdb", "devops", "db"],
                                     "ServiceName": "redis",
                                     "Notes": "",
                                     "Status": "critical",

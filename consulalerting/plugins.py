@@ -208,6 +208,8 @@ def notify_pagerduty(
 def notify_influxdb(obj, message_template, common_notifiers, consul_influxdb):
     for database in common_notifiers:
 
+        message_template = message_template.replace('\n', ' ')
+
         tags = 'ServiceID={ServiceID},CheckID={CheckID},Status={Status}'.format(
             ServiceID=obj.ServiceID,
             CheckID=obj.CheckID,
