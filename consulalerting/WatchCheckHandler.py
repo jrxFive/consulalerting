@@ -30,6 +30,15 @@ class WatchCheckHandler(object):
     def __getattr__(self, item):
         return None
 
+    def Cleanup(self):
+        try:
+            if(self.lock_result):
+                utilities.releaseLock("{k}/{h}".format(k=settings.KV_ALERTING_HASHES,
+                                                       h=self.currMD5Hash), self.session_id)
+                settings.logger.info("Lock Released.")
+        except:
+            settings.logger.excepton("Uncaught exception during Cleanup")
+
     def filterByBlacklists(self, object_list):
         """
         Filter a list of ConsulHealthStruct by the blacklists in the KV.
@@ -232,14 +241,14 @@ class WatchCheckHandler(object):
             settings.logger.info("Message=STDIN is invalid JSON using Consul lookup")
             self.health_current = utilities.currentState()
 
-        currMD5Hash = utilities.getHash(self.health_current)
+        self.currMD5Hash = utilities.getHash(self.health_current)
         self.session_id = utilities.createSession()
 
-        lock_result = utilities.acquireLock("{k}/{h}".format(k=settings.KV_ALERTING_HASHES,
-                                                             h=currMD5Hash), self.session_id)
+        self.lock_result = utilities.acquireLock("{k}/{h}".format(k=settings.KV_ALERTING_HASHES,
+                                                                  h=self.currMD5Hash), self.session_id)
 
 
-        if not lock_result:
+        if not self.lock_result:
             settings.logger.info("Message=Other consul alerting instance"
                                  "Processing alert and notifcation")
             return []
@@ -306,8 +315,13 @@ class WatchCheckHandler(object):
 
 if __name__ == "__main__":
     w = WatchCheckHandler(settings.consul)
-    alert_list = w.Run()
+    try:
+        alert_list = w.Run()
 
-    if alert_list:
-        n = NotificationEngine(alert_list, settings.consul)
-        n.Run()
+        if alert_list:
+            n = NotificationEngine(alert_list, settings.consul)
+            n.Run()
+    except:
+        settings.logger.exception("Uncaught Exception")
+    w.Cleanup()
+

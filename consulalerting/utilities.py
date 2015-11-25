@@ -74,6 +74,11 @@ def acquireLock(key, session_id):
     return settings.consul.kv.acquire_lock(key, session_id)
 
 
+def releaseLock(key, session_id):
+
+    return settings.consul.kv.release_lock(key, session_id)
+
+
 def getBlacklist(key):
 
     try:
