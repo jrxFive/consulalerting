@@ -49,10 +49,6 @@ the scripts can obtain the necessary KV information from Consul.
 
 ## Example ConsulAlertingKVBoostrap.py
 ```python
-
-
-
-
 blacklist_nodes = ["fqdn","other_fqdn"]
 blacklist_services = ["redis"]
 blacklist_checks = ["service:redis"]
@@ -94,6 +90,10 @@ notify_influxdb= {"url":"http://localhost:8086/write",
                   "databases":{"db":"mydb"}
                  }
 
+notify_elasticsearchlog = {"logpaths": ["/path/to/log1"],
+                           "logmode": "a",
+                           "newlinecharacter": "\n"
+                           }
 ```
 
 | Variable Name | Type | Description |

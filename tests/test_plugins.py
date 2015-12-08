@@ -5,6 +5,7 @@ import consulalerting.plugins as plugins
 import consulalerting.settings as settings
 import consulalerting.utilities as utilities
 import consulalerting.ConsulHealthStruct as ConsulHealthStruct
+from mock import patch, MagicMock, Mock
 
 
 ALL_REQUESTS_ALERTING_AVAILABLE_PLUGINS = [
@@ -40,6 +41,8 @@ CONSUL_MAILGUN = {"api_token": "testing123testing123",
 CONSUL_PAGERDUTY = {"teams": {"devops": ""}}
 
 CONSUL_INFLUXDB = {"url":"http://localhost:8086/write", "series":"test", "databases":{"db":"mydb"}}
+
+CONSUL_ELASTICSEARCHLOG = {"logpaths": ["/path/to/log1", "/path/to/log2"], "logmode": "a", "newlinecharacter": "\n"}
 
 
 class PluginsTests(unittest.TestCase):
@@ -172,3 +175,13 @@ class PluginsTests(unittest.TestCase):
             self.obj, self.message_template, ["db"], CONSUL_INFLUXDB)
 
         self.assertNotEqual(204, status_code)
+
+    def test_notifyElasticSearchLog(self):
+        open_mock = MagicMock()
+        with patch('__builtin__.open', open_mock):
+            open_mock.return_value = MagicMock(spec=file)
+            plugins.notify_elasticsearchlog(self.obj, self.message_template, CONSUL_ELASTICSEARCHLOG["logpaths"],
+                                            CONSUL_ELASTICSEARCHLOG)
+
+        file_handle = open_mock.return_value.__enter__.return_value
+        file_handle.write.assert_called_with(CONSUL_ELASTICSEARCHLOG["newlinecharacter"])
