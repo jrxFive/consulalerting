@@ -42,7 +42,7 @@ CONSUL_PAGERDUTY = {"teams": {"devops": ""}}
 
 CONSUL_INFLUXDB = {"url":"http://localhost:8086/write", "series":"test", "databases":{"db":"mydb"}}
 
-CONSUL_ELASTICSEARCHLOG = {"logpaths": ["/path/to/log1", "/path/to/log2"], "logmode": "a", "newlinecharacter": "\n"}
+CONSUL_ELASTICSEARCHLOG = {"logpaths": ["/path/to/log1", "/path/to/log2"]}
 
 
 class PluginsTests(unittest.TestCase):
@@ -184,4 +184,4 @@ class PluginsTests(unittest.TestCase):
                                             CONSUL_ELASTICSEARCHLOG)
 
         file_handle = open_mock.return_value.__enter__.return_value
-        file_handle.write.assert_called_with(CONSUL_ELASTICSEARCHLOG["newlinecharacter"])
+        file_handle.write.assert_called_with("\n")

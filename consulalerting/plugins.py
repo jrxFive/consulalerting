@@ -266,9 +266,9 @@ def notify_elasticsearchlog(obj, message_template, common_notifiers, consul_elas
 
     for logpath in common_notifiers:
         try:
-            with open(logpath, consul_elasticsearchlog["logmode"]) as elasticsearchlog:
+            with open(logpath, "a") as elasticsearchlog:
                 json.dump(logdata, elasticsearchlog)
-                elasticsearchlog.write(consul_elasticsearchlog["newlinecharacter"])
+                elasticsearchlog.write("\n")
 
         except IOError, es_log_error:
             settings.logger.error("There was an issue writing to {logpath}: {error}".format(logpath=logpath,

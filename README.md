@@ -90,10 +90,7 @@ notify_influxdb= {"url":"http://localhost:8086/write",
                   "databases":{"db":"mydb"}
                  }
 
-notify_elasticsearchlog = {"logpaths": ["/path/to/log1"],
-                           "logmode": "a",
-                           "newlinecharacter": "\n"
-                           }
+notify_elasticsearchlog = {"logpaths": ["/path/to/log1"]}
 ```
 
 | Variable Name | Type | Description |

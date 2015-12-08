@@ -193,7 +193,7 @@ class NotificationEngine(object):
                                                          influxdb)).start()
 
         if "elasticsearchlog" in obj.Tags and self.elasticsearchlog:
-            common_notifiers = utilities.common_notifiers(obj, "logs", self.elasticsearchlog)
+            common_notifiers = utilities.common_notifiers(obj, "logpaths", self.elasticsearchlog)
             elasticsearchlog = self.elasticsearchlog
             _ = Process(target=plugins.notify_elasticsearchlog, args=(obj, message_template,
                                                                       common_notifiers, elasticsearchlog)).start()

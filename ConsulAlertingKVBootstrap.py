@@ -40,10 +40,7 @@ notify_influxdb = {"url": "",
                    "databases": {}
                    }
 
-notify_elasticsearchlog = {"logpaths": [],
-                           "logmode": "a",
-                           "newlinecharacter": "\n"
-                           }
+notify_elasticsearchlog = {"logpaths": []}
 
 
 try:
