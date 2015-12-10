@@ -129,7 +129,7 @@ def common_notifiers(obj, kv_tags_dictname, kv_dict):
     return common
 
 
-def load_plugin(KV_LOCATION, tags_dictname):
+def load_plugin(KV_LOCATION, tags_dictname=None):
     # get request to 0.0.0.0:8500/v1/kv/notify/<plugin_name>
     #  which routes to consul master
     plugin = json.loads(settings.consul.kv[KV_LOCATION])
@@ -137,8 +137,9 @@ def load_plugin(KV_LOCATION, tags_dictname):
     # Convert Keys to lower case
     plugin = _dict_keys_to_low(plugin)
 
-    plugin[tags_dictname] = dict((key.lower(), value) for key,
-                                 value in plugin[tags_dictname].iteritems())
+    if tags_dictname:
+        plugin[tags_dictname] = dict((key.lower(), value) for key,
+                                     value in plugin[tags_dictname].iteritems())
 
     return plugin
 

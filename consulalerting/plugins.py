@@ -265,7 +265,7 @@ def notify_elasticsearchlog(obj, message_template, es_logpath):
                }
 
     try:
-        with open(es_logpath, "a") as elasticsearchlog:
+        with open(es_logpath["logpath"], "a") as elasticsearchlog:
             json.dump(logdata, elasticsearchlog)
             elasticsearchlog.write("\n")
 

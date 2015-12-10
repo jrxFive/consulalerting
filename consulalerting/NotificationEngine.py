@@ -111,7 +111,8 @@ class NotificationEngine(object):
                 settings.KV_ALERTING_NOTIFY_INFLUXDB, "databases")
 
         if "elasticsearchlog" in configurations_files_to_load:
-            self.elasticsearchlog = settings.KV_ALERTING_NOTIFY_ELASTICSEARCHLOG["logpath"]
+            self.elasticsearchlog = utilities.load_plugin(
+                settings.KV_ALERTING_NOTIFY_ELASTICSEARCHLOG)
 
         return (self.hipchat, self.slack, self.mailgun,
                 self.email, self.pagerduty, self.influxdb, self.elasticsearchlog)
