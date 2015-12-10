@@ -250,7 +250,7 @@ def notify_influxdb(obj, message_template, common_notifiers, consul_influxdb):
             return response.status_code
 
 
-def notify_elasticsearchlog(obj, message_template, common_notifiers, consul_elasticsearchlog):
+def notify_elasticsearchlog(obj, message_template, es_logpath):
 
     logdata = {"@timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
                "Message": message_template.replace('\n', ' '),
@@ -264,12 +264,11 @@ def notify_elasticsearchlog(obj, message_template, common_notifiers, consul_elas
                "ServiceName": obj.ServiceName
                }
 
-    for logpath in common_notifiers:
-        try:
-            with open(logpath, "a") as elasticsearchlog:
-                json.dump(logdata, elasticsearchlog)
-                elasticsearchlog.write("\n")
+    try:
+        with open(es_logpath, "a") as elasticsearchlog:
+            json.dump(logdata, elasticsearchlog)
+            elasticsearchlog.write("\n")
 
-        except IOError, es_log_error:
-            settings.logger.error("There was an issue writing to {logpath}: {error}".format(logpath=logpath,
-                                                                                            error=es_log_error))
+    except IOError, es_log_error:
+        settings.logger.error("There was an issue writing to {logpath}: {error}".format(logpath=es_logpath,
+                                                                                        error=es_log_error))

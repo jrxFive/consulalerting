@@ -111,8 +111,7 @@ class NotificationEngine(object):
                 settings.KV_ALERTING_NOTIFY_INFLUXDB, "databases")
 
         if "elasticsearchlog" in configurations_files_to_load:
-            self.elasticsearchlog = utilities.load_plugin(
-                settings.KV_ALERTING_NOTIFY_ELASTICSEARCHLOG, "logpaths")
+            self.elasticsearchlog = settings.KV_ALERTING_NOTIFY_ELASTICSEARCHLOG["logpath"]
 
         return (self.hipchat, self.slack, self.mailgun,
                 self.email, self.pagerduty, self.influxdb, self.elasticsearchlog)
@@ -193,10 +192,8 @@ class NotificationEngine(object):
                                                          influxdb)).start()
 
         if "elasticsearchlog" in obj.Tags and self.elasticsearchlog:
-            common_notifiers = utilities.common_notifiers(obj, "logpaths", self.elasticsearchlog)
-            elasticsearchlog = self.elasticsearchlog
             _ = Process(target=plugins.notify_elasticsearchlog, args=(obj, message_template,
-                                                                      common_notifiers, elasticsearchlog)).start()
+                                                                      self.elasticsearchlog)).start()
 
     def Run(self):
         self.get_available_plugins()

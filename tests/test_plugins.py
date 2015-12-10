@@ -42,7 +42,7 @@ CONSUL_PAGERDUTY = {"teams": {"devops": ""}}
 
 CONSUL_INFLUXDB = {"url":"http://localhost:8086/write", "series":"test", "databases":{"db":"mydb"}}
 
-CONSUL_ELASTICSEARCHLOG = {"logpaths": ["/path/to/log1", "/path/to/log2"]}
+CONSUL_ELASTICSEARCHLOG = {"logpath": "/path/to/log"}
 
 
 class PluginsTests(unittest.TestCase):
@@ -180,8 +180,7 @@ class PluginsTests(unittest.TestCase):
         open_mock = MagicMock()
         with patch('__builtin__.open', open_mock):
             open_mock.return_value = MagicMock(spec=file)
-            plugins.notify_elasticsearchlog(self.obj, self.message_template, CONSUL_ELASTICSEARCHLOG["logpaths"],
-                                            CONSUL_ELASTICSEARCHLOG)
+            plugins.notify_elasticsearchlog(self.obj, self.message_template, CONSUL_ELASTICSEARCHLOG["logpath"])
 
         file_handle = open_mock.return_value.__enter__.return_value
         file_handle.write.assert_called_with("\n")
