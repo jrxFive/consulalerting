@@ -180,7 +180,7 @@ class PluginsTests(unittest.TestCase):
         open_mock = MagicMock()
         with patch('__builtin__.open', open_mock):
             open_mock.return_value = MagicMock(spec=file)
-            plugins.notify_elasticsearchlog(self.obj, self.message_template, CONSUL_ELASTICSEARCHLOG["logpath"])
+            plugins.notify_elasticsearchlog(self.obj, self.message_template, CONSUL_ELASTICSEARCHLOG)
 
         file_handle = open_mock.return_value.__enter__.return_value
         file_handle.write.assert_called_with("\n")
