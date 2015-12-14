@@ -170,6 +170,12 @@ After the script is run, you can always change these within the Consul UI
 | series | string | Name of the database series that will contain the data |
 | databases | dict | Create dictionaries within 'databases' for tags corresponding to influxdb databases |
 
+### Elasticsearch Log
+
+| Keyname | Type | Description |
+| ------- | ---- | ----------- |
+| logpath | array of strings | Absolute path(s) of logfile to write in elasticsearch format |
+
 # TODO
 * ~~HA, install per leader, using locks and md5sums of state~~
 * ~~Plugin Separation~~
