@@ -3,6 +3,7 @@ import settings
 import smtplib
 import string
 import json as json
+from datetime import datetime
 
 def notify_hipchat(obj, message_template, common_notifiers, consul_hipchat):
     notify_value = 0
@@ -247,3 +248,27 @@ def notify_influxdb(obj, message_template, common_notifiers, consul_influxdb):
                     status=response.status_code))
 
             return response.status_code
+
+
+def notify_elasticsearchlog(obj, message_template, es_logpath):
+
+    logdata = {"@timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
+               "Message": message_template.replace('\n', ' '),
+               "Node": obj.Node,
+               "CheckID": obj.CheckID,
+               "Name": obj.Name,
+               "Tags": ', '.join(obj.Tags),
+               "Notes": obj.Notes,
+               "Output": obj.Output,
+               "ServiceID": obj.ServiceID,
+               "ServiceName": obj.ServiceName
+               }
+
+    try:
+        with open(es_logpath["logpath"], "a") as elasticsearchlog:
+            json.dump(logdata, elasticsearchlog)
+            elasticsearchlog.write("\n")
+
+    except IOError, es_log_error:
+        settings.logger.error("There was an issue writing to {logpath}: {error}".format(logpath=es_logpath,
+                                                                                        error=es_log_error))

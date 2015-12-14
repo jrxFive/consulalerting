@@ -67,13 +67,14 @@ class NotificationEngineTests(unittest.TestCase):
             ["devops", "consul", "mailgun", "hipchat", "redis", "techops", "dev", "slack", "qa", "redis-slave"])))
 
     def test_loadPluginsFromTags(self):
-        hipchat, slack, mailgun, email, pagerduty, influxdb = self.ne.load_plugins_from_tags()
+        hipchat, slack, mailgun, email, pagerduty, influxdb, elasticsearchlog = self.ne.load_plugins_from_tags()
         self.assertFalse(email)
         self.assertTrue(hipchat)
         self.assertFalse(slack)
         self.assertTrue(mailgun)
         self.assertFalse(pagerduty)
         self.assertFalse(influxdb)
+        self.assertFalse(elasticsearchlog)
 
 
 if __name__ == '__main__':

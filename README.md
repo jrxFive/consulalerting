@@ -49,10 +49,6 @@ the scripts can obtain the necessary KV information from Consul.
 
 ## Example ConsulAlertingKVBoostrap.py
 ```python
-
-
-
-
 blacklist_nodes = ["fqdn","other_fqdn"]
 blacklist_services = ["redis"]
 blacklist_checks = ["service:redis"]
@@ -94,6 +90,7 @@ notify_influxdb= {"url":"http://localhost:8086/write",
                   "databases":{"db":"mydb"}
                  }
 
+notify_elasticsearchlog = {"logpaths": ["/path/to/log1"]}
 ```
 
 | Variable Name | Type | Description |
@@ -172,6 +169,12 @@ After the script is run, you can always change these within the Consul UI
 | url | string | URL address of API access for the database |
 | series | string | Name of the database series that will contain the data |
 | databases | dict | Create dictionaries within 'databases' for tags corresponding to influxdb databases |
+
+### Elasticsearch Log
+
+| Keyname | Type | Description |
+| ------- | ---- | ----------- |
+| logpath | array of strings | Absolute path(s) of logfile to write in elasticsearch format |
 
 # TODO
 * ~~HA, install per leader, using locks and md5sums of state~~

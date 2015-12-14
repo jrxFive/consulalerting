@@ -7,37 +7,40 @@ blacklist_nodes = []
 blacklist_services = []
 blacklist_checks = []
 
-
 health_check_tags = []
 
+notify_plugins = ["hipchat", "slack", "mailgun", "email", "pagerduty", "influxdb", "elasticsearchlog"]
 
-notify_plugins = ["hipchat","slack","mailgun","email","pagerduty","influxdb"]
+notify_hipchat = {"api_token": "",
+                  "url": "",
+                  "rooms": {}
+                  }
 
-notify_hipchat= {"api_token":"",
-                 "url":"",
-                 "rooms":{}}
-
-notify_slack= {"api_token":"",
-                 "rooms":{}}
-
-notify_mailgun= {"api_token":"",
-                 "mailgun_domain":"",
-                 "from": "",
-                 "teams":{}
-                 }
-
-notify_email= {"mail_domain_address":"",
-               "username":"",
-               "password":"",
-               "from": "",
-               "teams":{}
+notify_slack = {"api_token": "",
+                "rooms": {}
                 }
 
-notify_pagerduty= {"teams":{}}
+notify_mailgun = {"api_token": "",
+                  "mailgun_domain": "",
+                  "from": "",
+                  "teams": {}
+                  }
 
-notify_influxdb= {"url":"",
-                  "series":"",
-                  "databases":{}}
+notify_email = {"mail_domain_address": "",
+                "username": "",
+                "password": "",
+                "from": "",
+                "teams": {}
+                }
+
+notify_pagerduty = {"teams": {}}
+
+notify_influxdb = {"url": "",
+                   "series": "",
+                   "databases": {}
+                   }
+
+notify_elasticsearchlog = {"logpath": ""}
 
 
 try:
@@ -63,11 +66,9 @@ try:
 
     settings.consul.kv[settings.KV_ALERTING_NOTIFY_INFLUXDB] = json.dumps(notify_influxdb)
 
+    settings.consul.kv[settings.KV_ALERTING_NOTIFY_ELASTICSEARCHLOG] = json.dumps(notify_elasticsearchlog)
+
     settings.consul.kv[settings.KV_PRIOR_STATE] = []
 except TypeError:
     print "One of the python data structures is not JSON serializable, may have accidentally created a set()"
     raise
-
-
-
-
