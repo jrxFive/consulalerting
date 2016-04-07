@@ -91,6 +91,11 @@ notify_influxdb= {"url":"http://localhost:8086/write",
                  }
 
 notify_elasticsearchlog = {"logpaths": ["/path/to/log1"]}
+
+notify_cachet = {"api_token": "tokenFromCachetUserProfile",
+                 "site_url": "http://status.company.com",
+                 "notify_subscribers": False
+                }
 ```
 
 | Variable Name | Type | Description |
@@ -175,6 +180,16 @@ After the script is run, you can always change these within the Consul UI
 | Keyname | Type | Description |
 | ------- | ---- | ----------- |
 | logpath | array of strings | Absolute path(s) of logfile to write in elasticsearch format |
+
+### Cachet
+
+| Keyname | Type | Description |
+| ------- | ---- | ----------- |
+| api_token | string | The API token provided by Cachet via a user profile page |
+| site_url | string | The url of the Cachet instance |
+| notify_subscribers | boolean | Whether or not subscribers should be notified of the incident |
+
+__NOTE:__ In order for this plugin to report Cachet incidents to specific components, it is expected that in addition to the `cachet` tag you also provide a "service nice name" as a tag. For example, if in Cachet your component is called "Data Import Service" you would then provided that same string as a tag in your service definition. If a matching tag is not found incidents will be reported with a generic name of "Consul State Change."
 
 # TODO
 * ~~HA, install per leader, using locks and md5sums of state~~

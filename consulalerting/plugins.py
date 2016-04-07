@@ -1,9 +1,13 @@
-import requests
-import settings
 import smtplib
 import string
 import json as json
 from datetime import datetime
+from urlparse import urljoin
+
+import requests
+import settings
+from requests import ConnectionError, HTTPError
+
 
 def notify_hipchat(obj, message_template, common_notifiers, consul_hipchat):
     notify_value = 0
@@ -248,6 +252,94 @@ def notify_influxdb(obj, message_template, common_notifiers, consul_influxdb):
                     status=response.status_code))
 
             return response.status_code
+
+
+def notify_cache(obj, message_template, cachet_config):
+    if not cachet_config.get('api_token'):
+        settings.logger.error("A Cachet API token must be provided in order to post incidents!")
+        return
+
+    if not cachet_config.get('site_url'):
+        settings.logger.error('A Cachet site url must be provided in order to post incidients!')
+        return
+
+    # Constants and configuration for the rest of the function
+    component_endpoint = "/api/v1/components"
+    component_url = urljoin(cachet_config['site_url'], component_endpoint)
+
+    incident_endpoint = "/api/v1/incidents"
+    incident_url = urljoin(cachet_config['site_url'], incident_endpoint)
+
+    headers = {
+        'X-Cachet-Token': cachet_config['api_token'],
+        'content-type': 'application/json',
+    }
+
+    incident_status = {
+        'Investigating': 1,
+        'Identified': 2,
+        'Watching': 3,
+        'Fixed': 4
+    }
+
+    component_statuses = {
+        'Operational': 1,
+        'Performance Issues': 2,
+        'Partial Outage': 3,
+        'Major Outage': 4
+    }
+
+    status_incident_map = {
+        settings.PASSING_STATE: incident_status['Fixed'],
+        settings.WARNING_STATE: incident_status['Investigating'],
+        settings.CRITICAL_STATE: incident_status['Investigating'],
+        settings.UNKNOWN_STATE: incident_status['Investigating']
+    }
+
+    status_component_map = {
+        settings.PASSING_STATE: component_statuses['Operational'],
+        settings.WARNING_STATE: component_statuses['Performance Issues'],
+        settings.CRITICAL_STATE: component_statuses['Major Outage'],
+        settings.UNKNOWN_STATE: component_statuses['Partial Outage']
+    }
+
+    # Get existing components to see if we can match the Consul state change to a Cachet component
+    # component_id will be set as a result
+    component_id = None
+    intersecting_tag = None
+    try:
+        components_response = requests.get(component_url)
+        components_response.raise_for_status()
+        components = components_response.json().get('data')
+        if components:
+            component_names = [component.get('name') for component in components]
+            intersecting_tag, = set(component_names).intersection(obj.Tags)
+            if intersecting_tag:
+                component_id = [comp['id'] for comp in components if comp['name'] == intersecting_tag][0]
+    except (ConnectionError, HTTPError) as components_exception:
+        settings.logger.error('Unable to retrieve Cachet components: {error}'.format(error=components_exception))
+    except ValueError:
+        # there was no intersecting tag to unpack
+        pass
+
+    # Construct the payload
+    data = {
+        'name': intersecting_tag if intersecting_tag else 'Consul State Change',
+        'message': message_template.replace('\n', ' '),
+        'status': status_incident_map.get(obj.Status),
+        'visible': 1,  # always visible
+        'notify': cachet_config['notify_subscribers'] if cachet_config['notify_subscribers'] else False
+    }
+    if component_id:
+        data['component_id'] = component_id
+        data['component_status'] = status_component_map.get(obj.Status)
+
+    try:
+        response = requests.post(incident_url, headers=headers, data=json.dumps(data))
+        response.raise_for_status()
+        return response.status_code
+    except (ConnectionError, HTTPError) as incidents_exception:
+        settings.logger.error('Unable to post Cachet incident: {error}'.format(error=incidents_exception))
 
 
 def notify_elasticsearchlog(obj, message_template, es_logpath):

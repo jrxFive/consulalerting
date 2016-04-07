@@ -6,15 +6,17 @@ import consulalerting.settings as settings
 import consulalerting.utilities as utilities
 import consulalerting.ConsulHealthStruct as ConsulHealthStruct
 from mock import patch, MagicMock, Mock
+from requests import HTTPError
 
 
 ALL_REQUESTS_ALERTING_AVAILABLE_PLUGINS = [
-    "hipchat", "slack", "mailgun", "pagerduty", "influxdb"]
+    "hipchat", "slack", "mailgun", "pagerduty", "influxdb", "cachet"]
 
 ALL_REQUESTS_PLUGINS_ALERT_LIST = [{"Node": "consul",
                                     "CheckID": "service:redis",
                                     "Name": "Service 'redis' check",
-                                    "Tags": ["hipchat", "slack", "mailgun", "pagerduty", "influxdb", "devops", "db"],
+                                    "Tags": ["hipchat", "slack", "mailgun", "pagerduty", "influxdb", "devops", "db",
+                                             "Redis"],
                                     "ServiceName": "redis",
                                     "Notes": "",
                                     "Status": "critical",
@@ -43,6 +45,11 @@ CONSUL_PAGERDUTY = {"teams": {"devops": ""}}
 CONSUL_INFLUXDB = {"url":"http://localhost:8086/write", "series":"test", "databases":{"db":"mydb"}}
 
 CONSUL_ELASTICSEARCHLOG = {"logpath": "/path/to/log"}
+
+CONSUL_CACHET = {"api_token": "notreallyatoken",
+                 "site_url": "http://status.company.com",
+                 "notify_subscribers": False,
+                 }
 
 
 class PluginsTests(unittest.TestCase):
@@ -127,6 +134,121 @@ class PluginsTests(unittest.TestCase):
         self.assertEqual(204, status_code)
 
     @responses.activate
+    def test_Cachet_get_post(self):
+        """
+        Successfully gets components and posts incidents to Cachet
+        """
+        get_data = {
+            'data': [
+                {
+                    "id": 2,
+                    "name": "Redis",
+                    "description": "",
+                    "link": "",
+                    "status": 1,
+                    "order": 2,
+                    "group_id": 1,
+                    "created_at": "2016-04-05 14:22:30",
+                    "updated_at": "2016-04-05 14:23:23",
+                    "deleted_at": None,
+                    "enabled": True,
+                    "status_name": "Operational"
+                },
+                {
+                    "id": 4,
+                    "name": "mysql",
+                    "description": "",
+                    "link": "",
+                    "status": 1,
+                    "order": 4,
+                    "group_id": 1,
+                    "created_at": "2016-04-05 14:22:54",
+                    "updated_at": "2016-04-05 14:23:23",
+                    "deleted_at": None,
+                    "enabled": True,
+                    "status_name": "Operational"
+                }
+            ]
+        }
+
+        responses.add(responses.GET, "http://status.company.com/api/v1/components", json=get_data, status=200)
+        responses.add(responses.POST, "http://status.company.com/api/v1/incidents", json=True, status=200)
+
+        status_code = plugins.notify_cache(self.obj, self.message_template, CONSUL_CACHET)
+        self.assertEqual(200, status_code)
+
+    @responses.activate
+    def test_Cachet_get_no_data_post_success(self):
+        """
+        Success gets empty Component data and posts incidents to Cachet
+        """
+        get_data = {
+            'data': []
+        }
+        responses.add(responses.GET, "http://status.company.com/api/v1/components", json=get_data, status=200)
+        responses.add(responses.POST, "http://status.company.com/api/v1/incidents", json=True, status=200)
+
+        status_code = plugins.notify_cache(self.obj, self.message_template, CONSUL_CACHET)
+        self.assertEqual(200, status_code)
+
+    @responses.activate
+    def test_Cachet_get_no_intersecting_tag_post_success(self):
+        """
+        Successfully gets components and posts incidents to Cachet
+        However, because the retrieved components do not match any of the provided tags
+        A ValueError is encountered (and passed)
+        """
+        get_data = {
+            'data': [
+                {
+                    "id": 2,
+                    "name": "notRedis",  # we change the name in this test to something we know does not match
+                    "description": "",
+                    "link": "",
+                    "status": 1,
+                    "order": 2,
+                    "group_id": 1,
+                    "created_at": "2016-04-05 14:22:30",
+                    "updated_at": "2016-04-05 14:23:23",
+                    "deleted_at": None,
+                    "enabled": True,
+                    "status_name": "Operational"
+                },
+                {
+                    "id": 4,
+                    "name": "mysql",
+                    "description": "",
+                    "link": "",
+                    "status": 1,
+                    "order": 4,
+                    "group_id": 1,
+                    "created_at": "2016-04-05 14:22:54",
+                    "updated_at": "2016-04-05 14:23:23",
+                    "deleted_at": None,
+                    "enabled": True,
+                    "status_name": "Operational"
+                }
+            ]
+        }
+
+        responses.add(responses.GET, "http://status.company.com/api/v1/components", json=get_data, status=200)
+        responses.add(responses.POST, "http://status.company.com/api/v1/incidents", json=True, status=200)
+
+        status_code = plugins.notify_cache(self.obj, self.message_template, CONSUL_CACHET)
+        self.assertEqual(200, status_code)
+
+    @responses.activate
+    def test_Cachet_get_fail_post_success(self):
+        """
+        Successfully posts incidents to Cachet despite being unable to get components
+        """
+        responses.add(responses.GET, "http://status.company.com/api/v1/components", status=400)
+        responses.add(responses.POST, "http://status.company.com/api/v1/incidents", json=True, status=200)
+
+        status_code = plugins.notify_cache(self.obj, self.message_template, CONSUL_CACHET)
+        self.assertEqual(200, status_code)
+
+    @responses.activate
     def test_notifySlackFail(self):
         responses.add(
             responses.POST, "https://slack.com/api/chat.postMessage", json=True, status=400)
@@ -175,6 +297,14 @@ class PluginsTests(unittest.TestCase):
             self.obj, self.message_template, ["db"], CONSUL_INFLUXDB)
 
         self.assertNotEqual(204, status_code)
+
+    @responses.activate
+    def test_CachetFail(self):
+        responses.add(responses.GET, "http://status.company.com/api/v1/components", status=400)
+        responses.add(responses.POST, "http://status.company.com/api/v1/incidents", json=True, status=400)
+
+        status_code = plugins.notify_cache(self.obj, self.message_template, CONSUL_CACHET)
+        self.assertNotEqual(200, status_code)
 
     def test_notifyElasticSearchLog(self):
         open_mock = MagicMock()
