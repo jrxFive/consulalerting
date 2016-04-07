@@ -257,11 +257,11 @@ def notify_influxdb(obj, message_template, common_notifiers, consul_influxdb):
 def notify_cache(obj, message_template, cachet_config):
     if not cachet_config.get('api_token'):
         settings.logger.error("A Cachet API token must be provided in order to post incidents!")
-        return
+        return None
 
     if not cachet_config.get('site_url'):
         settings.logger.error('A Cachet site url must be provided in order to post incidients!')
-        return
+        return None
 
     # Constants and configuration for the rest of the function
     component_endpoint = "/api/v1/components"
@@ -303,8 +303,7 @@ def notify_cache(obj, message_template, cachet_config):
         settings.UNKNOWN_STATE: component_statuses['Partial Outage']
     }
 
-    # Get existing components to see if we can match the Consul state change to a Cachet component
-    # component_id will be set as a result
+    # Get existing components from Cachet
     component_id = None
     intersecting_tag = None
     try:
@@ -314,25 +313,30 @@ def notify_cache(obj, message_template, cachet_config):
         if components:
             component_names = [component.get('name') for component in components]
             intersecting_tag, = set(component_names).intersection(obj.Tags)
-            if intersecting_tag:
-                component_id = [comp['id'] for comp in components if comp['name'] == intersecting_tag][0]
+            component_id = [comp['id'] for comp in components if comp['name'] == intersecting_tag][0]
+        else:
+            settings.logger.error('No components were retrieved from Cachet. Skipping incident reporting.')
     except (ConnectionError, HTTPError) as components_exception:
-        settings.logger.error('Unable to retrieve Cachet components: {error}'.format(error=components_exception))
+        settings.logger.error('Unable to retrieve Cachet components: {error}.'
+                              'Shipping incident reporting.'.format(error=components_exception))
     except ValueError:
         # there was no intersecting tag to unpack
-        pass
+        settings.logger.error('A matching component could not be found. Skipping incident reporting.')
+
+    if not all([component_id, intersecting_tag]):
+        # an exception was encountered above and we are unable to construct the POST
+        return None
 
     # Construct the payload
     data = {
-        'name': intersecting_tag if intersecting_tag else 'Consul State Change',
+        'name': '{service} is in a {status} state'.format(service=intersecting_tag, status=obj.Status),
         'message': message_template.replace('\n', ' '),
         'status': status_incident_map.get(obj.Status),
         'visible': 1,  # always visible
-        'notify': cachet_config['notify_subscribers'] if cachet_config['notify_subscribers'] else False
+        'notify': cachet_config['notify_subscribers'] if cachet_config['notify_subscribers'] else False,
+        'component_id': component_id,
+        'component_status': status_component_map.get(obj.Status)
     }
-    if component_id:
-        data['component_id'] = component_id
-        data['component_status'] = status_component_map.get(obj.Status)
 
     try:
         response = requests.post(incident_url, headers=headers, data=json.dumps(data))
@@ -340,6 +344,7 @@ def notify_cache(obj, message_template, cachet_config):
         return response.status_code
     except (ConnectionError, HTTPError) as incidents_exception:
         settings.logger.error('Unable to post Cachet incident: {error}'.format(error=incidents_exception))
+        return None
 
 
 def notify_elasticsearchlog(obj, message_template, es_logpath):
