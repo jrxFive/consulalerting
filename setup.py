@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="consulalerting",
-    version="0.0.5",
+    version="2.0.1",
     description="A set of python files for Consul for checks, watches, and notifications",
     url="https://github.com/jrxFive/Consul-Alerting",
     author="Jonathan R. Cross",
