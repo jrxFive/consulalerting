@@ -110,6 +110,10 @@ class NotificationEngine(object):
             self.influxdb = utilities.load_plugin(
                 settings.KV_ALERTING_NOTIFY_INFLUXDB, "databases")
 
+        if "cachet" in configurations_files_to_load:
+            self.cachet = utilities.load_plugin(
+                settings.KV_ALERTING_NOTIFY_CACHET)
+
         if "elasticsearchlog" in configurations_files_to_load:
             self.elasticsearchlog = utilities.load_plugin(
                 settings.KV_ALERTING_NOTIFY_ELASTICSEARCHLOG)
@@ -191,6 +195,9 @@ class NotificationEngine(object):
             _ = Process(target=plugins.notify_influxdb, args=(obj, message_template,
                                                          common_notifiers,
                                                          influxdb)).start()
+
+        if "cachet" in obj.Tags and self.cachet:
+            _ = Process(target=plugins.notify_cache, args=(obj, message_template, self.cachet)).start()
 
         if "elasticsearchlog" in obj.Tags and self.elasticsearchlog:
             _ = Process(target=plugins.notify_elasticsearchlog, args=(obj, message_template,
