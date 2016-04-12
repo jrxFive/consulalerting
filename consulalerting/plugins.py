@@ -305,15 +305,17 @@ def notify_cache(obj, message_template, cachet_config):
 
     # Get existing components from Cachet
     component_id = None
+    component_name = None
     intersecting_tag = None
     try:
         components_response = requests.get(component_url)
         components_response.raise_for_status()
         components = components_response.json().get('data')
         if components:
-            component_names = [component.get('name') for component in components]
+            component_names = [component['name'].lower() for component in components]
             intersecting_tag, = set(component_names).intersection(obj.Tags)
-            component_id = [comp['id'] for comp in components if comp['name'] == intersecting_tag][0]
+            component_id, component_name = [(comp['id'], comp['name']) for comp in components
+                                            if comp['name'].lower() == intersecting_tag][0]
         else:
             settings.logger.error('No components were retrieved from Cachet. Skipping incident reporting.')
     except (ConnectionError, HTTPError) as components_exception:
@@ -323,13 +325,13 @@ def notify_cache(obj, message_template, cachet_config):
         # there was no intersecting tag to unpack
         settings.logger.error('A matching component could not be found. Skipping incident reporting.')
 
-    if not all([component_id, intersecting_tag]):
+    if not all([component_id, component_name, intersecting_tag]):
         # an exception was encountered above and we are unable to construct the POST
         return None
 
     # Construct the payload
     data = {
-        'name': '{service} is in a {status} state'.format(service=intersecting_tag, status=obj.Status),
+        'name': '{service} is in a {status} state'.format(service=component_name, status=obj.Status),
         'message': message_template.replace('\n', ' '),
         'status': status_incident_map.get(obj.Status),
         'visible': 1,  # always visible
